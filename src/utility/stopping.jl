@@ -20,4 +20,4 @@ Base.:&(a::stopcrit, b::stopcrit) = MultipleCrit([a, b])
 (crit::convcrit)(steps::Int, data) = crit.Δ < crit.f(steps, data)
 
 # evaluate every criterion with short circuiting
-(crit::MultipleCrit)(steps::Int, data) = all(c -> c(steps, data), crit.crits)
+(crit::MultipleCrit)(steps::Int, data) = !any(c -> !c(steps, data), crit.crits)
