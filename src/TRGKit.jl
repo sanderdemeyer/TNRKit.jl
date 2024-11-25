@@ -16,7 +16,8 @@ module TRGKit
     export run!
 
     # models
-    # include("models/ising.jl")
+    include("models/ising.jl")
+    export classical_ising
 
     # export the different models (do we really want to ship those ourselves?)    
 end 
