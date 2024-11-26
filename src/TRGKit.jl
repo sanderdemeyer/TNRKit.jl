@@ -12,12 +12,15 @@ module TRGKit
     include("schemes/btrg.jl")
     include("schemes/hotrg.jl")
     
-    export TRG, BTRG, HOTRG, trg_convcrit, btrg_convcrit
+    export TRGScheme, TRG, BTRG, HOTRG, trg_convcrit, btrg_convcrit
     export run!
 
     # models
     include("models/ising.jl")
     export classical_ising
+
+    include("models/gross-neveu.jl")
+    export gross_neveu_start
 
     # export the different models (do we really want to ship those ourselves?)    
 end 
