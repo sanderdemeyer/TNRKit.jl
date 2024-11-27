@@ -2,12 +2,9 @@ mutable struct TRG <: TRGScheme
     # data
     T::TensorMap
 
-    # run! parameters
-    crit::stopcrit
     finalize!::Function
-
-    function TRG(T::TensorMap; stop=maxiter(100), f=finalize!)
-        return new(T, stop, f)
+    function TRG(T::TensorMap; finalize=finalize!)
+        return new(T, finalize)
     end
 end
 

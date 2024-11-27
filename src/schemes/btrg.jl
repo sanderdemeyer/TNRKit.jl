@@ -5,13 +5,10 @@ mutable struct BTRG <: TRGScheme
     S2::TensorMap
     k::Float64
 
-    # run! parameters
-    crit::stopcrit
     finalize!::Function
-
-    function BTRG(T::TensorMap, k::Number; stop=maxiter(100), f=finalize!)
+    function BTRG(T::TensorMap, k::Number; finalize=finalize!)
         # Construct S1 and S2 as identity matrices.
-        new(T, id(space(T, 1)), id(space(T, 1)), k, stop, f)
+        new(T, id(space(T, 1)), id(space(T, 1)), k, finalize)
     end
 end
 
