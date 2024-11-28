@@ -24,16 +24,14 @@ end
 
 
 function step!(scheme::BTRG, trunc::TensorKit.TruncationScheme)
-    k = scheme.k
-
     U, S, V, _ϵ = tsvd(scheme.T, (1, 4), (2, 3); trunc=trunc)
 
     # make the legs normal again
     U = permute(U, (1,), (2, 3))
     V = permute(V, (1, 2), (3,))
 
-    S_a = pseudopow(S, (1 - k) / 2; tol=1e-16)
-    S_b = pseudopow(S, k; tol=-1e16)
+    S_a = pseudopow(S, (1 - scheme.k) / 2)
+    S_b = pseudopow(S, scheme.k)
 
     @plansor begin
         A[-1; -2 -3] := U[-1; -2 1] * S_a[1; -3]
@@ -44,8 +42,8 @@ function step!(scheme::BTRG, trunc::TensorKit.TruncationScheme)
     U, S, V, _ϵ = tsvd(scheme.T, (1, 2), (3, 4); trunc=trunc)
 
     # spaces are already correct
-    S_a = pseudopow(S, (1 - k) / 2)
-    S_b = pseudopow(S, k)
+    S_a = pseudopow(S, (1 - scheme.k) / 2)
+    S_b = pseudopow(S, scheme.k)
 
     @plansor begin
         C[-1 -2; -3] := U[-1 -2; 1] * S_a[1; -3]
