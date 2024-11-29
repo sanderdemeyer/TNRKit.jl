@@ -51,6 +51,10 @@ function step!(scheme::HOTRG, trunc::TensorKit.TruncationScheme)
     @tensor R[-1; -2] := MRd[-1; 1 2 3]*MR[1 2 3; -2]
     _, SR, UR, _ = tsvd(R; trunc = trunc)
 
+    traceL = @tensor SL[1;1]
+    traceR = @tensor SR[1;1]
+
+    if traceL 
     
 
 end
