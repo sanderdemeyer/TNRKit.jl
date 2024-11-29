@@ -46,6 +46,11 @@ function step!(scheme::HOTRG, trunc::TensorKit.TruncationScheme)
     @tensor L[-1; -2] := ML[-1; 1 2 3]*MLd[1 2 3; -2]
     UL, SL, _, _ = tsvd(L; trunc = trunc)
 
-    MR = permute(M, )
+    MR = permute(M, (1,2,4), (3,))
+    MRd = adjoint(MR)
+    @tensor R[-1; -2] := MRd[-1; 1 2 3]*MR[1 2 3; -2]
+    _, SR, UR, _ = tsvd(R; trunc = trunc)
+
+    
 
 end
