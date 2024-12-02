@@ -12,7 +12,7 @@ module TRGKit
     include("schemes/btrg.jl")
     include("schemes/hotrg.jl")
     
-    export TRGScheme, TRG, BTRG, HOTRG, trg_convcrit, btrg_convcrit
+    export TRGScheme, TRG, BTRG, HOTRG, trg_convcrit, btrg_convcrit, hotrg_convcrit
     export run!
 
     # models
