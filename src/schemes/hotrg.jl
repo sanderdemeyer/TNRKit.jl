@@ -2,8 +2,8 @@ mutable struct HOTRG <: TRGScheme
     T::TensorMap
 
     finalize!::Function
-    function HOTRG(T::TensorMap)
-        new(T, finalize!)
+    function HOTRG(T::TensorMap; finalize=finalize!)
+        new(T, finalize)
     end
 end
 
@@ -13,10 +13,10 @@ function step!(scheme::HOTRG, trunc::TensorKit.TruncationScheme)
 
     # Get unitaries
     U, _, _, εₗ = tsvd(M, (1, 2), (3, 4, 5, 6); trunc=trunc)
-    UR, _, _, εᵣ = tsvd(M, (4, 5), (1, 2, 3, 6); trunc=trunc)
+    _, _, UR, εᵣ = tsvd(M, (1, 2, 3, 6), (4, 5); trunc=trunc)
 
     if εₗ > εᵣ
-        U = UR
+        U = permute(adjoint(UR), (2, 1), (3,))
     end
 
     # adjoint(U) on the left, U on the right
