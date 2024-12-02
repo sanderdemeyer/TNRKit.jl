@@ -34,27 +34,36 @@ end
 
 function step!(scheme::HOTRG, trunc::TensorKit.TruncationScheme)
     #HOTRG along horizontal
-    @tensor M_temp[-1 -2 -3; -4 -5 -6] := scheme.T[-1 1; -5 -6]*scheme.T[-2 -3; -4 1]
+    @tensor M[-1 -2 -3; -4 -5 -6] := scheme.T[-1 1; -5 -6]*scheme.T[-2 -3; -4 1]
 
-    spaceT = space(scheme.T)
-    U = isometry(fuse(spaceT[1], spaceT[1]), spaceT[1] ⊗ spaceT[1])
-    Udg = adjoint(U)
-    @tensor M[-1 -2; -3 -4] := M_temp[1 2 -2; 3 4 -4]* U[-1; 1 2]*Udg[3 4; -3]
+    UL, _, _, ϵ1 = tsvd(M, (1,2), (3,4,5,6); trunc = trunc)
 
-    ML = permute(M, (1,),(2,3,4))
-    MLd = adjoint(ML)
-    @tensor L[-1; -2] := ML[-1; 1 2 3]*MLd[1 2 3; -2]
-    UL, SL, _, _ = tsvd(L; trunc = trunc)
+    _, _, UR, ϵ2 = tsvd(M, (1,2,3,6),(5,4); trunc = trunc)
 
-    MR = permute(M, (1,2,4), (3,))
-    MRd = adjoint(MR)
-    @tensor R[-1; -2] := MRd[-1; 1 2 3]*MR[1 2 3; -2]
-    _, SR, UR, _ = tsvd(R; trunc = trunc)
+    PL = adjoint(UL)
+    PR = UL
 
-    traceL = @tensor SL[1;1]
-    traceR = @tensor SR[1;1]
+    if ϵ2 < ϵ1
+        PL = UR
+        PR = adjoint(UR)
+    end
 
-    if traceL 
-    
+    @tensor scheme.T[-1 -2; -3 -4] := PL[-1; 1 2]*M[1 2 -2; 3 4 -4]*PR[4 3; -3]
 
+    #HOTRG along vertical
+    @tensor M[-1 -2 -3; -4 -5 -6] := scheme.T[-1 -2; 1 -6]*scheme.T[1 -3; -4 -5]
+
+    UD, _, _, ϵ1 = tsvd(M, (2,3), (4,5,6,1); trunc = trunc)
+
+    _,_,UU, ϵ2 = tsvd(M, (6,5),(1,2,3,4); trunc = trunc)
+
+    PD = adjoint(UD)
+    PU = UD
+
+    if ϵ2 < ϵ1
+        PD = UU
+        PU = adjoint(UU)
+    end
+    @tensor scheme.T[-1 -2; -3 -4] := PD[-2; 1 2]*M[-1 1 2; -3 3 4]*PU[4 3; -4]
+    return scheme
 end
