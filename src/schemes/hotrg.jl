@@ -34,3 +34,6 @@ function finalize!(scheme::HOTRG)
 
     return n
 end
+
+# example convcrit function
+hotrg_convcrit(steps::Int, data) = abs(log(data[end]) * 2.0^(-steps))
