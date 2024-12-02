@@ -17,7 +17,7 @@ function run!(scheme::TRGScheme, trscheme::TensorKit.TruncationScheme, criterion
     crit = true
     
     while crit
-        @info "Step $steps, data[end]: $(!isempty(data) ? data[end] : "empty")"
+        @info "Step $(steps + 1), data[end]: $(!isempty(data) ? data[end] : "empty")"
         step!(scheme, trscheme)
         push!(data, scheme.finalize!(scheme))
         steps += 1
