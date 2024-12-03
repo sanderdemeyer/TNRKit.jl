@@ -13,7 +13,7 @@ module TRGKit
     include("schemes/hotrg.jl")
     
     export TRGScheme, TRG, BTRG, HOTRG, trg_convcrit, btrg_convcrit
-    export run!
+    export run!, step!
 
     # models
     include("models/ising.jl")
@@ -22,5 +22,7 @@ module TRGKit
     include("models/gross-neveu.jl")
     export gross_neveu_start
 
+    include("models/trianguar-ising.jl")
+    export triangle_bad
     # export the different models (do we really want to ship those ourselves?)    
 end 
