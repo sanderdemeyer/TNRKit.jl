@@ -21,7 +21,7 @@ end
 @show lnz_triangle_bad
 
 # initialize the BTRG scheme
-scheme = BTRG(triangle_bad(), 1)
+scheme = BTRG(triangle_bad(), 0)
 
 # run the BTRG scheme
 data = run!(scheme, truncdim(16), stopping_criterion; finalize_beginning=false)
