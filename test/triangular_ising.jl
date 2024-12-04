@@ -4,13 +4,17 @@ using .TRGKit
 
 trg_f(steps::Int, data) = abs(log(data[end]) * 2.0^(-steps))
 
+exact_lnz = 0.3230659669
+
 # stop when converged or after 50 steps, whichever comes first
-stopping_criterion = convcrit(1e-20, trg_f)&maxiter(200)
+stopping_criterion = convcrit(1e-16, trg_f)&maxiter(50)
 
 χs = [8, 16, 24, 32]
 
 lnz_trgs = []
 lnz_btrgs = []
+lnz_trgerrors = []
+lnz_btrgerrors = []
 for χ in χs
     scheme_TRG = TRG(triangle_bad())
     data_trg = run!(scheme_TRG, truncdim(χ), stopping_criterion; finalize_beginning=false)
@@ -32,11 +36,12 @@ for χ in χs
 
     push!(lnz_trgs, lnz_trg)
     push!(lnz_btrgs, lnz_btrg)
-    
+    push!(lnz_trgerrors, abs(lnz_trg - exact_lnz))
+    push!(lnz_btrgerrors, abs(lnz_btrg - exact_lnz))
 
 end
 
-CSV.write("data/triangle_atsushi.csv", DataFrame(χ=χs, lnz_trg=lnz_trgs, lnz_btrg=lnz_btrgs))
+CSV.write("data/triangle_atsushi.csv", DataFrame(χ=χs, lnz_trg=lnz_trgs, lnz_btrg=lnz_btrgs, lnz_trgerror = lnz_trgerrors, lnz_btrgerror = lnz_btrgerrors))
 
 data = CSV.read("data/triangle_atsushi.csv", DataFrame)
 p1 = scatter(data.χ, data.lnz_trg, xlabel = "χ", ylabel = "Free energy", label = "TRG")
