@@ -7,7 +7,7 @@ trg_f(steps::Int, data) = abs(log(data[end]) * 2.0^(-steps))
 exact_lnz = 0.3230659669
 
 # stop when converged or after 50 steps, whichever comes first
-stopping_criterion = convcrit(1e-16, trg_f)&maxiter(50)
+stopping_criterion = convcrit(1e-20, trg_f)
 
 χs = [8, 16, 24, 32]
 
@@ -47,3 +47,9 @@ data = CSV.read("data/triangle_atsushi.csv", DataFrame)
 p1 = scatter(data.χ, data.lnz_trg, xlabel = "χ", ylabel = "Free energy", label = "TRG")
 p2 = scatter!(data.χ, data.lnz_btrg, xlabel = "χ", ylabel = "Free energy", label = "BTRG")
 savefig("atsushi.png") # save the fig referenced by plot_ref as filename_string (such as "output.png")
+
+p3 = scatter(data.χ, data.lnz_trgerror, xlabel = "χ", ylabel = "Error", label = "TRG")
+p4 = scatter!(data.χ, data.lnz_btrgerror, xlabel = "χ", ylabel = "Error", label = "BTRG")
+plot!(p3, yscale=:log10)
+plot!(p4, yscale=:log10)
+savefig("atsushi_error.png") # save the fig referenced by plot_ref as filename_string (such as "output.png")
