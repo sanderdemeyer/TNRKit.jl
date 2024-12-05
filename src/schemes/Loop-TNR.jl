@@ -87,6 +87,11 @@ function find_R(pos::Int, psi::Array, maxsteps::Int, minerror::Float64)
 end
 
 
-
+function P_decomp(R::TensorMap, L::TensorMap)
+    @tensor temp[-1; -2] := R[-1; 1]*L[1; -2]
+    
+    
+    return PR, PL
+en
 
 
