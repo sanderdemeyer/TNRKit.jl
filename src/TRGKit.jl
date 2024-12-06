@@ -11,9 +11,10 @@ module TRGKit
     include("schemes/trg.jl")
     include("schemes/btrg.jl")
     include("schemes/hotrg.jl")
+    include("schemes/Loop-TNR.jl")
     
-    export TRGScheme, TRG, BTRG, HOTRG, trg_convcrit, btrg_convcrit
-    export run!, step!
+    export TRGScheme, TRG, BTRG, HOTRG, trg_convcrit, btrg_convcrit, Loop_TNR
+    export run!, step!, pseudopow, entanglement_filtering!
 
     # models
     include("models/ising.jl")

@@ -4,7 +4,7 @@ mutable struct Loop_TNR <: TRGScheme
     TB::TensorMap
 
     finalize!::Function
-    function TRG(TA::TensorMap, TB::TensorMap; finalize=finalize!)
+    function Loop_TNR(TA::TensorMap, TB::TensorMap; finalize=finalize!)
         return new(TA, TB, finalize)
     end
 end
@@ -20,31 +20,33 @@ end
 
 function QR_L(L::TensorMap, T::TensorMap)
     @tensor temp[-1 -2; -3 -4] := L[-2; 1]*T[-1 1; -3 -4]
-    _, R = leftorth(temp, (1,2,4),(3,); alg = QR())
-    return R
+    _, Rt = leftorth(temp, (1,2,4),(3,))
+    return Rt
 end
 
 function QR_R(R::TensorMap, T::TensorMap)
     @tensor temp[-1 -2; -3 -4] := T[-1 -2; 1 -4]*R[1; -3]
-    L, _ = rightorth(temp, (2,),(1,3,4); alg = LQ())
-    return L
+    Lt, _ = rightorth(temp, (2,),(1,3,4))
+    return Lt
 end
 
 function maximumer(T::TensorMap)
     maxi = []
-    for (_, b) in blocks(T)
-        push!(maxi, maximum(abs.(b[])))
+    for (_, d) in blocks(T)
+        push!(maxi, maximum(abs.(d)))
     end
     return maximum(maxi)
 end
 
 function find_L(pos::Int, psi::Array, maxsteps::Int, minerror::Float64)
     L = id(space(psi[pos])[2])
+    
     crit = true
     steps = 0
     error = Inf
 
     while crit 
+        
         new_L = copy(L)
         for i = pos-1:pos+2
             new_L = QR_L(new_L, psi[i%4 + 1])
@@ -52,8 +54,10 @@ function find_L(pos::Int, psi::Array, maxsteps::Int, minerror::Float64)
         new_L = new_L/maximumer(new_L)
 
         if space(new_L) == space(L)
-            error = norm(new_L - L)
+            error = abs(norm(new_L - L))
+            
         end
+        
         L = new_L
         steps += 1
         crit = steps < maxsteps && error > minerror
@@ -63,20 +67,22 @@ function find_L(pos::Int, psi::Array, maxsteps::Int, minerror::Float64)
 end
 
 function find_R(pos::Int, psi::Array, maxsteps::Int, minerror::Float64)
-    R = id(space(psi[mod(pos-2,4)+1])[3])
+    R = id(space(psi[mod(pos-2,4)+1])[3]')
     crit = true
     steps = 0
     error = Inf
 
     while crit 
         new_R = copy(R)
+        
         for i = pos-2:-1:pos-5
+            
             new_R = QR_R(new_R, psi[mod(i,4) + 1])
         end
         new_R = new_R/maximumer(new_R)
 
         if space(new_R) == space(R)
-            error = norm(new_R - R)
+            error = abs(norm(new_R - R))
         end
         R = new_R
         steps += 1
@@ -87,11 +93,60 @@ function find_R(pos::Int, psi::Array, maxsteps::Int, minerror::Float64)
 end
 
 
-function P_decomp(R::TensorMap, L::TensorMap)
-    @tensor temp[-1; -2] := R[-1; 1]*L[1; -2]
+function P_decomp(R::TensorMap, L::TensorMap, trunc::TensorKit.TruncationScheme)
+    @tensor temp[-1; -2] := L[-1; 1]*R[1; -2]
+    U, S, V, _ = tsvd(temp, (1,), (2,); trunc = trunc)
     
-    
+    re_sq = pseudopow(S, -0.5)
+    @tensor PR[-1;-2] := R[-1, 1]*adjoint(V)[1;2]*re_sq[2, -2]
+    @tensor PL[-1;-2] := re_sq[-1, 1]*adjoint(U)[1;2]*L[2, -2]
+
     return PR, PL
-en
+end
+
+function find_projectors(psi::Array, maxsteps::Int, minerror::Float64, trunc::TensorKit.TruncationScheme)
+    PR_list = []
+    PL_list = []
+    for i = 1:4
+        @show i
+        L = find_L(i, psi, maxsteps, minerror)
+        println("L found")
+        R = find_R(i, psi, maxsteps, minerror)
+        println("R found")
+        pr, pl = P_decomp(R, L, trunc)
+        println("projector found")
+        @show space(pr)
+        @show space(pl)
+        push!(PR_list, pr)
+        push!(PL_list, pl)
+    end
+    return PR_list, PL_list
+end
+
+function entanglement_filtering!(scheme::Loop_TNR, maxsteps::Int, minerror::Float64, trunc::TensorKit.TruncationScheme)
+    psi = make_psi(scheme)
+    @show psi[1]
+    @show psi[2]
+    @show psi[3] 
+    @show psi[4]
+    println("Psi made")
+
+    PR_list, PL_list = find_projectors(psi, maxsteps, minerror, trunc)
+    
+    @show space(scheme.TA)
+    @show space(scheme.TB)
+    @tensor scheme.TA[-1 -2; -3 -4] := PR_list[4][-1;1]*PL_list[1][-2;2]*scheme.TA[1 2; 3 4]*PR_list[2][3; -3]*PL_list[3][4; -4]
+    @tensor scheme.TB[-1 -2; -3 -4] := PL_list[2][-1;1]*PR_list[3][-2;2]*scheme.TB[1 2; 3 4]*PL_list[4][3; -3]*PR_list[1][4; -4]
+
+    return scheme
+end
+
+function finalize!(scheme::Loop_TNR)
+    n1 = norm(@tensor scheme.TA[1 2; 1 2])
+    n2 = norm(@tensor scheme.TB[1 2; 1 2])
+    scheme.TA /= n1
+    scheme.TB /= n2
+    return n1, n2
+end
 
 
