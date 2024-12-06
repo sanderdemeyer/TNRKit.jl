@@ -12,6 +12,9 @@ mutable struct BTRG <: TRGScheme
     end
 end
 
+# Default implementation using the optimal value for k
+BTRG(T::TensorMap) = BTRG(T, -0.5)
+
 function pseudopow(t::TensorMap, a::Real; tol=eps(scalartype(t))^(3 / 4))
     t′ = copy(t)
     for (c, b) in blocks(t′)
