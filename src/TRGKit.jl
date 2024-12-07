@@ -17,10 +17,14 @@ module TRGKit
 
     # models
     include("models/ising.jl")
-    export classical_ising
+    export classical_ising, classical_ising_symmetric
 
     include("models/gross-neveu.jl")
     export gross_neveu_start
+
+    # utility functions
+    include("utility/cft.jl")
+    export cft_data
 
     # export the different models (do we really want to ship those ourselves?)    
 end 

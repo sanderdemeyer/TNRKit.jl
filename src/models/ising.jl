@@ -9,3 +9,26 @@ function classical_ising(β::Number; h=0)
         
     return T
 end
+
+function classical_ising_symmetric(β)
+    V = Vect[Z2Irrep](0=>1,1=>1)
+    Ising = zeros(2,2,2,2)
+    c = cosh(β)
+    s = sinh(β)
+    for i=1:2
+        for j=1:2
+            for k=1:2
+                for l=1:2
+                    if (i+j+k+l)==4
+                        Ising[i,j,k,l]=2*c*c
+                    elseif (i+j+k+l)==6
+                        Ising[i,j,k,l]=2*c*s
+                    elseif (i+j+k+l)==8
+                        Ising[i,j,k,l]=2*s*s
+                    end
+                end
+            end
+        end
+    end
+    return TensorMap(Ising,V⊗V←V⊗V)
+end
