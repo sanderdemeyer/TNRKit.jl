@@ -1,5 +1,5 @@
 module TRGKit
-    using TensorKit, LinearAlgebra
+    using TensorKit, LinearAlgebra, OMEinsum
     using Printf
 
     # stop criteria
@@ -24,6 +24,6 @@ module TRGKit
     export gross_neveu_start
 
     include("models/trianguar-ising.jl")
-    export triangle_bad
+    export triangle_bad, triangle_good, triangle_bad_2, triangle_bad_3
     # export the different models (do we really want to ship those ourselves?)    
 end 
