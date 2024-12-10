@@ -59,11 +59,6 @@ function step!(scheme::BTRG, trunc::TensorKit.TruncationScheme)
 
     @tensor T′[-1 -2; -3 -4] := B[-1 1; 8] * S1[2; 1] * D[-2; 3 2] * S2[3; 4] * A[4; 5 -3] * S1[5; 6] * C[7 6; -4] * S2[8; 7]
 
-<<<<<<< HEAD
-
-
-=======
->>>>>>> dev
     scheme.T = T′
     scheme.S1 = E
     scheme.S2 = F
