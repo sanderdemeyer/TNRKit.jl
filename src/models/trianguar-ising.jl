@@ -22,7 +22,7 @@ function triangle_good(β)
 
     m = reshape(ein"im,in,jo,jp,kq,kr,ls,lt,ik,kl,lj,ji,il->mqrsptno"(I(2),I(2),I(2),I(2),I(2),I(2),I(2),I(2),w2,w2,w2,w2,w1),4,4,4,4)
     
-    return TensorMap(m, ℂ^4⊗ℂ^4←ℂ^4⊗ℂ^4)
+    return permute(TensorMap(m, ℂ^4⊗ℂ^4←ℂ^4⊗ℂ^4), (4,1),(2,3))
 end
 
 function triangle_bad_2(β)
