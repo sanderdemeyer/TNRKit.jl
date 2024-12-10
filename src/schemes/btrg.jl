@@ -8,7 +8,7 @@ mutable struct BTRG <: TRGScheme
     finalize!::Function
     function BTRG(T::TensorMap, k::Number; finalize=finalize!)
         # Construct S1 and S2 as identity matrices.
-        new(T, id(space(T, 1)), id(space(T, 1)), k, finalize)
+        new(T, id(space(T, 1)), id(space(T, 2)), k, finalize)
     end
 end
 
@@ -57,7 +57,7 @@ function step!(scheme::BTRG, trunc::TensorKit.TruncationScheme)
     S1 = scheme.S1
     S2 = scheme.S2
 
-    @tensor T′[-1 -2; -3 -4] := B[-1 1; 8] * S1[2; 1] * D[-2; 3 2] * S2[3; 4] * A[4; 5 -3] * S1[5; 6] * C[7 6; -4] * S2[8; 7]
+    @tensor T′[-1 -2; -3 -4] := B[-1 1; 8] * S2[2; 1] * D[-2; 3 2] * S1[3; 4] * A[4; 5 -3] * S2[5; 6] * C[7 6; -4] * S1[8; 7]
 
     scheme.T = T′
     scheme.S1 = E

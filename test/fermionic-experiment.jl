@@ -11,7 +11,7 @@ end
 function fermionic_btrg_finalize!(scheme::TRGScheme)
     scheme.T = permute(scheme.T, (1, 2), (3, 4))
 
-    n = norm(@tensor scheme.T[1 2; 3 4] * scheme.S1[4; 2] * scheme.S2[3; 1])
+    n = norm(@tensor scheme.T[1 2; 3 4] * scheme.S1[3; 1] * scheme.S2[4; 2])
     scheme.T /= n
     return n
 end
@@ -35,31 +35,31 @@ for m in ms
     for χ in χs
         T = gross_neveu_start(0, m, 0)
         # trg = TRG(copy(T); finalize=fermionic_trg_finalize!)
-        # btrg = BTRG(copy(T),-0.5;  finalize=fermionic_btrg_finalize!)
-        hotrg = HOTRG(copy(T);  finalize=fermionic_hotrg_finalize!)
+        btrg = BTRG(copy(T),-0.5;  finalize=fermionic_btrg_finalize!)
+        #hotrg = HOTRG(copy(T);  finalize=fermionic_hotrg_finalize!)
         # data_trg = run!(trg, truncdim(χ), convcrit(1e-20, custom_convcrit))
-        # data_btrg = run!(btrg, truncdim(χ), convcrit(1e-20, custom_convcrit))
-        data_hotrg = run!(hotrg, truncdim(χ), convcrit(1e-20, custom_convcrit_hot))
+        data_btrg = run!(btrg, truncdim(χ), convcrit(1e-20, custom_convcrit))
+        #data_hotrg = run!(hotrg, truncdim(χ), convcrit(1e-20, custom_convcrit_hot))
 
         # lnz_trg = 0
         # for (i, d) in enumerate(data_trg)
         #     lnz_trg += log(d) * 2.0^(1-i)
         # end
 
-        # lnz_btrg = 0
-        # for (i, d) in enumerate(data_btrg)
-        #     lnz_btrg += log(d) * 2.0^(1-i)
-        # end
-
-        lnz_hotrg = 0
-        for (i, d) in enumerate(data_hotrg)
-            lnz_hotrg += log(d) * 4.0^(1-i)
+        lnz_btrg = 0
+        for (i, d) in enumerate(data_btrg)
+            lnz_btrg += log(d) * 2.0^(1-i)
         end
-        @show lnz_trg
+
+        # lnz_hotrg = 0
+        # for (i, d) in enumerate(data_hotrg)
+        #     lnz_hotrg += log(d) * 4.0^(1-i)
+        # end
+        # @show lnz_trg
 
         # push!(lnz_trgs, lnz_trg)
-        # push!(lnz_btrgs, lnz_btrg)
-        push!(lnz_hotrgs, lnz_hotrg)
+        push!(lnz_btrgs, lnz_btrg)
+        #push!(lnz_hotrgs, lnz_hotrg)
     end
     #CSV.write("data/fermionic_m$(m).csv", DataFrame(χ=χs, lnz_trg=lnz_trgs, lnz_btrg=lnz_btrgs, lnz_hotrg=lnz_hotrgs))
 end
