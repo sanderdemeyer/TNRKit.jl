@@ -50,7 +50,7 @@ for m in ms
         for (i, d) in enumerate(data_btrg)
             lnz_btrg += log(d) * 2.0^(1-i)
         end
-
+        @show lnz_btrg
         # lnz_hotrg = 0
         # for (i, d) in enumerate(data_hotrg)
         #     lnz_hotrg += log(d) * 4.0^(1-i)

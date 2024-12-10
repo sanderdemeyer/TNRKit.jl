@@ -25,6 +25,9 @@ module TRGKit
 
     include("models/trianguar-ising.jl")
     export triangle_bad, triangle_good, triangle_bad_2, triangle_bad_3
+
+    include("models/Hubbard_2D.jl")
+    export Hubbard2D_start
     # utility functions
     include("utility/cft.jl")
     export cft_data
