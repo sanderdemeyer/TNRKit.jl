@@ -2,25 +2,25 @@ using Revise, TensorKit, DataFrames, CSV
 includet("../src/TRGKit.jl")
 using .TRGKit
 
-function fermionic_trg_finalize!(scheme::TRGScheme)
-    n = norm(@tensor scheme.T[1 2; 1 2])
-    scheme.T /= n
-    return n
-end
+# function fermionic_trg_finalize!(scheme::TRGScheme)
+#     n = norm(@tensor scheme.T[1 2; 1 2])
+#     scheme.T /= n
+#     return n
+# end
 
-function fermionic_btrg_finalize!(scheme::TRGScheme)
-    scheme.T = permute(scheme.T, (1, 2), (3, 4))
+# function fermionic_btrg_finalize!(scheme::TRGScheme)
+#     scheme.T = permute(scheme.T, (1, 2), (3, 4))
 
-    n = norm(@tensor scheme.T[1 2; 3 4] * scheme.S1[3; 1] * scheme.S2[4; 2])
-    scheme.T /= n
-    return n
-end
+#     n = norm(@tensor scheme.T[1 2; 3 4] * scheme.S1[3; 1] * scheme.S2[4; 2])
+#     scheme.T /= n
+#     return n
+# end
 
-function fermionic_hotrg_finalize!(scheme::TRGScheme)
-    n = norm(@tensor scheme.T[1 2; 1 2])
-    scheme.T /= n
-    return n
-end
+# function fermionic_hotrg_finalize!(scheme::TRGScheme)
+#     n = norm(@tensor scheme.T[1 2; 1 2])
+#     scheme.T /= n
+#     return n
+# end
 
 custom_convcrit(steps::Int, data) = abs(log(data[end]) * 2.0^(1-steps))
 custom_convcrit_hot(steps::Int, data) = abs(log(data[end]) * 4.0^(1-steps))
@@ -35,7 +35,7 @@ for m in ms
     for χ in χs
         T = gross_neveu_start(0, m, 0)
         # trg = TRG(copy(T); finalize=fermionic_trg_finalize!)
-        btrg = BTRG(copy(T),-0.5;  finalize=fermionic_btrg_finalize!)
+        btrg = BTRG(copy(T))
         #hotrg = HOTRG(copy(T);  finalize=fermionic_hotrg_finalize!)
         # data_trg = run!(trg, truncdim(χ), convcrit(1e-20, custom_convcrit))
         data_btrg = run!(btrg, truncdim(χ), convcrit(1e-20, custom_convcrit))
