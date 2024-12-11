@@ -26,7 +26,7 @@ custom_convcrit(steps::Int, data) = abs(log(data[end]) * 2.0^(1-steps))
 custom_convcrit_hot(steps::Int, data) = abs(log(data[end]) * 2.0^(1-steps))
 
 ms = [0]
-χs = [16]
+χs = [32]
 
 for m in ms
     lnz_trgs = []
