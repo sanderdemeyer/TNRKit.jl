@@ -11,7 +11,9 @@ end
 
 function make_psi(scheme::Loop_TNR)
     #TODO: change ordering of incoming and ordering legs and fuse the physical legs if necessary
-    psi = [scheme.TA, permute(scheme.TB, (4,1),(2,3)), permute(scheme.TA, (3,4),(1,2)), permute(scheme.TB, (2,3),(4,1))]
+    #psi = [scheme.TA, permute(scheme.TB, (4,1),(2,3)), permute(scheme.TA, (3,4),(1,2)), permute(scheme.TB, (2,3),(4,1))]
+    psi = [permute(scheme.TA, (4,2), (3,1)), permute(scheme.TB, (3,1),(2,4)), permute(scheme.TA, (2,4),(1,3)), permute(scheme.TB, (1,3),(4,2))]
+
     return psi
 end
 
