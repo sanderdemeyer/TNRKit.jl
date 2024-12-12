@@ -98,6 +98,13 @@ function P_decomp(R::TensorMap, L::TensorMap, trunc::TensorKit.TruncationScheme)
     U, S, V, _ = tsvd(temp, (1,), (2,); trunc = trunc)
     
     re_sq = pseudopow(S, -0.5)
+
+    @show space(R)
+    @show space(L)
+    @show space(adjoint(U))
+    @show space(V)
+    @show space(adjoint(V))
+    @show space(re_sq)
     @tensor PR[-1;-2] := R[-1, 1]*adjoint(V)[1;2]*re_sq[2, -2]
     @tensor PL[-1;-2] := re_sq[-1, 1]*adjoint(U)[1;2]*L[2, -2]
 
@@ -110,13 +117,12 @@ function find_projectors(psi::Array, maxsteps::Int, minerror::Float64, trunc::Te
     for i = 1:4
         @show i
         L = find_L(i, psi, maxsteps, minerror)
-        println("L found")
+        
         R = find_R(i, psi, maxsteps, minerror)
-        println("R found")
+        
         pr, pl = P_decomp(R, L, trunc)
-        println("projector found")
-        @show space(pr)
-        @show space(pl)
+        
+        
         push!(PR_list, pr)
         push!(PL_list, pl)
     end
@@ -125,20 +131,22 @@ end
 
 function entanglement_filtering!(scheme::Loop_TNR, maxsteps::Int, minerror::Float64, trunc::TensorKit.TruncationScheme)
     psi = make_psi(scheme)
-    @show psi[1]
-    @show psi[2]
-    @show psi[3] 
-    @show psi[4]
+    
     println("Psi made")
 
     PR_list, PL_list = find_projectors(psi, maxsteps, minerror, trunc)
     
-    @show space(scheme.TA)
-    @show space(scheme.TB)
+    # @tensor psi1[-1 -2; -3 -4] := adjoint(PR_list[4])[-1;1]*PL_list[1][-2;2]*psi[1][1 2; 3 4]*PR_list[2][3; -3]*adjoint(PL_list[3])[4; -4]
+    # @tensor psi2[-1 -2; -3 -4] := PR_list[1][-1;1]*PL_list[2][-2;2]*psi[2][1 2; 3 4]*PR_list[3][3; -3]*adjoint(PL_list[4])[4; -4]
+    # @tensor psi3[-1 -2; -3 -4] := adjoint(PR_list[2])[-1;1]*PL_list[3][-2;2]*psi[3][1 2; 3 4]*PR_list[4][3; -3]*adjoint(PL_list[1])[4; -4]
+    # @tensor psi4[-1 -2; -3 -4] := adjoint(PR_list[3])[-1;1]*PL_list[4][-2;2]*psi[4][1 2; 3 4]*PR_list[1][3; -3]*adjoint(PL_list[2])[4; -4]
     @tensor scheme.TA[-1 -2; -3 -4] := PR_list[4][-1;1]*PL_list[1][-2;2]*scheme.TA[1 2; 3 4]*PR_list[2][3; -3]*PL_list[3][4; -4]
     @tensor scheme.TB[-1 -2; -3 -4] := PL_list[2][-1;1]*PR_list[3][-2;2]*scheme.TB[1 2; 3 4]*PL_list[4][3; -3]*PR_list[1][4; -4]
-
-    return scheme
+    # scheme.TA = psi1
+    # scheme.TB = permute(psi2, (2,3),(4,1))
+    # @show permute(psi3, (3,4),(1,2))
+    # @show permute(psi4, (4,1),(2,3))
+    return scheme, PR_list, PL_list
 end
 
 function finalize!(scheme::Loop_TNR)
