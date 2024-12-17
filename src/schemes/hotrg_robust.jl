@@ -23,7 +23,7 @@ function step!(scheme::HOTRG_robust, trunc::TensorKit.TruncationScheme)
 
 
     # adjoint(U) on the left, U on the right
-    @tensor scheme.T[-1 -2; -3 -4] := Proj_2[-1; 1 2] * M[1 2 -2; 3 4 -4] * Proj_1[3 4; -3]
+    @tensor scheme.T[-1 -2; -3 -4] := Proj_2[-1; 2 1] * M[1 2 -2; 3 4 -4] * Proj_1[4 3; -3]
 
     return scheme
 end
