@@ -3,7 +3,7 @@ includet("../src/TRGKit.jl")
 using .TRGKit
 
 Ising_βc = log(1.0+sqrt(2))/2.0
-scheme = Loop_TNR(classical_ising(Ising_βc), classical_ising(Ising_βc))
+scheme = Loop_TNR(gross_neveu_start(0,0,0), gross_neveu_start(0,0,0))
 
 entanglement_filtering!(scheme, 100, 1e-10, truncdim(16))
 # psi = make_psi(scheme)
