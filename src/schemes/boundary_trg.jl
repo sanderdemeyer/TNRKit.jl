@@ -11,7 +11,7 @@ end
  
 function contraction_subroutine(T::TensorMap, E::TensorMap, trunc::TensorKit.TruncationScheme)
     @tensor temp_bound_north[-1 -2 -3; -4] := E[-1 -2; 1]*E[1 -3; -4]
-    @tensor temp_bulk[-1 -2 -3; -4 -5 -6] = T[-1 -2; 1 -6]*T[1 -3; -4 -5]
+    @tensor temp_bulk[-1 -2 -3; -4 -5 -6] := T[-1 -2; 1 -6]*T[1 -3; -4 -5]
 
     #construct projectors for vertical contraction
     R1, _ = rightorth(temp_bound_north, (2,3), (4,1))
@@ -73,14 +73,17 @@ end
 function step!(scheme::Boundary_TRG, trunc::TensorKit.TruncationScheme)
     # The boundary tensors are all along the horizontal direction
     # Contract along the vertical direction
-    scheme.T, scheme.E1 = contraction_subroutine(scheme.T, scheme.E1, trunc)
-
-    T_temp = permute(scheme.T, (3,4),(1,2))
+    T_temp_1, scheme.E1 = contraction_subroutine(scheme.T, scheme.E1, trunc)
+    println("Part 1 done")
+    T_temp_2 = permute(scheme.T, (3,4),(1,2))
     E_temp = permute(scheme.E2, (2,3),(1,))
 
-    T_temp, E_temp = contraction_subroutine(T_temp, E_temp, trunc)
-    scheme.T = permute(T_temp, (3,4),(1,2))
+    T_temp_2, E_temp = contraction_subroutine(T_temp_2, E_temp, trunc)
+    T_temp_2 = permute(T_temp_2, (3,4),(1,2))
     scheme.E2 = permute(E_temp, (3,),(1,2))
+
+    #TODO: Flip legs and contract the two temperory tensors into one
+    
 
     return scheme
 end
