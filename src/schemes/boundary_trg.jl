@@ -8,12 +8,10 @@ mutable struct Boundary_TRG <: TRGScheme
     end
 end
 
-
-function step!(scheme::Boundary_TRG, trunc::TensorKit.TruncationScheme)
-    # The boundary tensors are all along the horizontal direction
-    # Contract along the vertical direction
-    @tensor temp_bound_north[-1 -2 -3; -4] := scheme.E1[-1 -2; 1]*scheme.E1[1 -3; -4]
-    @tensor temp_bulk[-1 -2 -3; -4 -5 -6] = scheme.T[-1 -2; 1 -6]*scheme.T[1 -3; -4 -5]
+ 
+function contraction_subroutine(T::TensorMap, E::TensorMap, trunc::TensorKit.TruncationScheme)
+    @tensor temp_bound_north[-1 -2 -3; -4] := E[-1 -2; 1]*E[1 -3; -4]
+    @tensor temp_bulk[-1 -2 -3; -4 -5 -6] = T[-1 -2; 1 -6]*T[1 -3; -4 -5]
 
     #construct projectors for vertical contraction
     R1, _ = rightorth(temp_bound_north, (2,3), (4,1))
@@ -65,9 +63,24 @@ function step!(scheme::Boundary_TRG, trunc::TensorKit.TruncationScheme)
     @tensor Proj_8[-1; -2 -3] := inv_s[-1; 1] * adjoint(U)[1; 2] * R4[2; -2 -3]
 
     #renormalise the tensors along horizontal
-    @tensor scheme.E1[-1 -2; -3] := Proj_6[-1; 2 1]*another_north[1 2 -2; 3 4]*Proj_5[4 3; -3]
-    @tensor scheme.T[-1 -2; -3 -4] := Proj_8[-1; 2 1]*another_bulk[1 2 -2; 3 4 -4]*Proj_7[4 3; -3]
-    
+    @tensor new_E[-1 -2; -3] := Proj_6[-1; 2 1]*another_north[1 2 -2; 3 4]*Proj_5[4 3; -3]
+    @tensor new_T[-1 -2; -3 -4] := Proj_8[-1; 2 1]*another_bulk[1 2 -2; 3 4 -4]*Proj_7[4 3; -3]
+
+    return new_T, new_E
+end
+
+
+function step!(scheme::Boundary_TRG, trunc::TensorKit.TruncationScheme)
+    # The boundary tensors are all along the horizontal direction
+    # Contract along the vertical direction
+    scheme.T, scheme.E1 = contraction_subroutine(scheme.T, scheme.E1, trunc)
+
+    T_temp = permute(scheme.T, (3,4),(1,2))
+    E_temp = permute(scheme.E2, (2,3),(1,))
+
+    T_temp, E_temp = contraction_subroutine(T_temp, E_temp, trunc)
+    scheme.T = permute(T_temp, (3,4),(1,2))
+    scheme.E2 = permute(E_temp, (3,),(1,2))
 
     return scheme
 end
