@@ -4,10 +4,11 @@ using .TRGKit
 
 # criterion to determine convergence
 trg_f(steps::Int, data) = abs(log(data[end]) * 2.0^((1-steps)))
-
+# bound_trg_blk(steps::Int, data) = abs(log(data[end][1]) * 4.0^((1-steps)))
+# bound_trg_env(steps::Int, data) = abs(log(data[end][2]) * 2.0^((1-steps)))
 # stop when converged or after 50 steps, whichever comes first
 stopping_criterion = convcrit(1e-20, trg_f)&maxiter(40)
-
+#stopping_criterion = convcrit(1e-12, bound_trg_blk)&maxiter(40)&convcrit(1e-12, bound_trg_env)
 
 # initialize the TRG scheme
 
