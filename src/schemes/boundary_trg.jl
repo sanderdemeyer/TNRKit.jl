@@ -105,16 +105,15 @@ function step!(scheme::Boundary_TRG, trunc::TensorKit.TruncationScheme)
     # The boundary tensors are all along the horizontal direction
     # Contract along the vertical direction
     scheme.E1 = boundary_subroutine(scheme.T, scheme.E1, trunc)
-    println("Part 1 done")
+    
     T_temp_2 = permute(scheme.T, (3,4),(1,2))
-    E_temp = permute(scheme.E2, (2,3),(1,))
-
+    E_temp = permute(scheme.E2, (2,3),(1,))    
     E_temp = boundary_subroutine(T_temp_2, E_temp, trunc)
     scheme.E2 = permute(E_temp, (3,),(1,2))
     U = isometry(flip(space(scheme.E2)[1]), space(scheme.E2)[1])
     Udg = adjoint(U)
-    U_intobulk = isometry(flip(space(scheme.E2)[2]), space(scheme.E2)[2])
-    @tensor scheme.E2[-1; -2 -3] := scheme.E2[1; 2 3]*U[-1; 1]*U_intobulk[2; -2]*Udg[3; -3]
+    U_intobulk = isometry(flip(space(scheme.E2)[3]), space(scheme.E2)[3])
+    @tensor scheme.E2[-1; -2 -3] := scheme.E2[1; 2 3]*U[-1; 1]*U_intobulk[3; -3]*Udg[2; -2]
     
     scheme.T = bulk_subroutine(scheme.T, trunc)
     
@@ -132,5 +131,5 @@ function finalize!(scheme::Boundary_TRG)
 end
 
 # example convcrit function
-hotrg_robust_convcrit(steps::Int, data) = abs(log(data[end]) * 2.0^(-steps))
+#hotrg_robust_convcrit(steps::Int, data) = abs(log(data[end]) * 2.0^(-steps))
 

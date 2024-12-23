@@ -10,10 +10,7 @@ mutable struct Loop_TNR <: TRGScheme
 end
 
 function make_psi(scheme::Loop_TNR)
-    #TODO: change ordering of incoming and ordering legs and fuse the physical legs if necessary
-    #psi = [scheme.TA, permute(scheme.TB, (4,1),(2,3)), permute(scheme.TA, (3,4),(1,2)), permute(scheme.TB, (2,3),(4,1))]
     psi = [permute(scheme.TA, (4,2), (3,1)), permute(scheme.TB, (3,1),(2,4)), permute(scheme.TA, (2,4),(1,3)), permute(scheme.TB, (1,3),(4,2))]
-
     return psi
 end
 
@@ -143,6 +140,8 @@ function entanglement_filtering!(scheme::Loop_TNR, maxsteps::Int, minerror::Floa
     @tensor scheme.TB[-1 -2; -3 -4] := TB[-1 2; 3 -4]*U2[-2; 2]*Udg1[3; -3]
     return scheme
 end
+
+
 
 function finalize!(scheme::Loop_TNR)
     n1 = norm(@tensor scheme.TA[1 2; 1 2])
