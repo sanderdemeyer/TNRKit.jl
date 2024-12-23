@@ -8,8 +8,10 @@ function classical_ising(β::Number; h=0)
         
     T_array = [exp(β * (σ(i)σ(j) + σ(j)σ(k) + σ(k)σ(l) + σ(l)σ(i)) + h/2 * β * (σ(i) + σ(j) + σ(k) + σ(l))) for i in 1:2, j in 1:2, k in 1:2, l in 1:2]
     
-    T = TensorMap(T_array, ℝ^2⊗ℝ^2←ℝ^2⊗ℝ^2)
-        
+    #T = TensorMap(T_array, ℝ^2⊗ℝ^2←ℝ^2⊗ℝ^2)
+    V = Vect[Z2Irrep](0=>1,1=>1)
+    T = TensorMap(T_array, ℂ^2⊗ℂ^2←ℂ^2⊗ℂ^2)
+    #T = TensorMap(T_array, V⊗V←V⊗V)
     return T
 end
 

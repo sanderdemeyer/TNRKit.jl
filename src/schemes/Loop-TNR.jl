@@ -10,8 +10,7 @@ mutable struct Loop_TNR <: TRGScheme
 end
 
 function make_psi(scheme::Loop_TNR)
-    #TODO: change ordering of incoming and ordering legs and fuse the physical legs if necessary
-    psi = [scheme.TA, permute(scheme.TB, (4,1),(2,3)), permute(scheme.TA, (3,4),(1,2)), permute(scheme.TB, (2,3),(4,1))]
+    psi = [permute(scheme.TA, (4,2), (3,1)), permute(scheme.TB, (3,1),(2,4)), permute(scheme.TA, (2,4),(1,3)), permute(scheme.TB, (1,3),(4,2))]
     return psi
 end
 
@@ -96,8 +95,8 @@ end
 function P_decomp(R::TensorMap, L::TensorMap, trunc::TensorKit.TruncationScheme)
     @tensor temp[-1; -2] := L[-1; 1]*R[1; -2]
     U, S, V, _ = tsvd(temp, (1,), (2,); trunc = trunc)
-    
     re_sq = pseudopow(S, -0.5)
+    
     @tensor PR[-1;-2] := R[-1, 1]*adjoint(V)[1;2]*re_sq[2, -2]
     @tensor PL[-1;-2] := re_sq[-1, 1]*adjoint(U)[1;2]*L[2, -2]
 
@@ -108,15 +107,13 @@ function find_projectors(psi::Array, maxsteps::Int, minerror::Float64, trunc::Te
     PR_list = []
     PL_list = []
     for i = 1:4
-        @show i
+        
         L = find_L(i, psi, maxsteps, minerror)
-        println("L found")
+        
         R = find_R(i, psi, maxsteps, minerror)
-        println("R found")
+        
         pr, pl = P_decomp(R, L, trunc)
-        println("projector found")
-        @show space(pr)
-        @show space(pl)
+        
         push!(PR_list, pr)
         push!(PL_list, pl)
     end
@@ -125,21 +122,26 @@ end
 
 function entanglement_filtering!(scheme::Loop_TNR, maxsteps::Int, minerror::Float64, trunc::TensorKit.TruncationScheme)
     psi = make_psi(scheme)
-    @show psi[1]
-    @show psi[2]
-    @show psi[3] 
-    @show psi[4]
-    println("Psi made")
+    
 
     PR_list, PL_list = find_projectors(psi, maxsteps, minerror, trunc)
     
-    @show space(scheme.TA)
-    @show space(scheme.TB)
-    @tensor scheme.TA[-1 -2; -3 -4] := PR_list[4][-1;1]*PL_list[1][-2;2]*scheme.TA[1 2; 3 4]*PR_list[2][3; -3]*PL_list[3][4; -4]
-    @tensor scheme.TB[-1 -2; -3 -4] := PL_list[2][-1;1]*PR_list[3][-2;2]*scheme.TB[1 2; 3 4]*PL_list[4][3; -3]*PR_list[1][4; -4]
+    @tensor psi1[-1 -2; -3 -4] := psi[1][1 2; 3 4]*PL_list[3][-1;1]*PL_list[1][-2;2]*PR_list[2][3; -3]*PR_list[4][4; -4]
+    TA = permute(psi1, (4,2),(3,1))
+    @tensor psi2[-1 -2; -3 -4] := psi[2][1 2; 3 4]*PL_list[4][-1; 1]*PL_list[2][-2; 2]*PR_list[3][3;-3]*PR_list[1][4;-4]
+    
+    TB = permute(psi2, (2,3),(1,4))
+    U1 = isometry(flip(space(TA)[1]),space(TA)[1])
+    Udg1 = adjoint(U1)
+    U2 = isometry(flip(space(TB)[2]),space(TB)[2])
+    Udg2 = adjoint(U2)
 
+    @tensor scheme.TA[-1 -2; -3 -4] := TA[1 -2; -3 4]*U1[-1;1]*Udg2[4; -4]
+    @tensor scheme.TB[-1 -2; -3 -4] := TB[-1 2; 3 -4]*U2[-2; 2]*Udg1[3; -3]
     return scheme
 end
+
+
 
 function finalize!(scheme::Loop_TNR)
     n1 = norm(@tensor scheme.TA[1 2; 1 2])
