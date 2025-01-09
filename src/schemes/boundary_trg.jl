@@ -8,28 +8,64 @@ mutable struct Boundary_TRG <: TRGScheme
     end
 end
 
- 
 function boundary_subroutine(T::TensorMap, E::TensorMap, trunc::TensorKit.TruncationScheme)
+    @tensor boundbulk_vertical[-1 -2 -3; -4 -5] := E[-1 1; -5]*T[-2 -3; -4 1]
+    @tensor bulk_horizontal[-1 -2 -3; -4 -5 -6] := T[-1 -2; 1 -6]*T[1 -3; -4 -5]
+    
+    #construct projectors for vertical contraction
+    R1, _ = rightorth(bulk_horizontal, (2,3), (4,5,6,1))
+    _, R2 = leftorth(bulk_horizontal, (1,2,3,4), (5,6))
+
+    @tensor R1R2[-1; -2] := R2[-1; 1 2] * R1[2 1; -2]
+
+    U, S, V, _ = tsvd(R1R2, (1,), (2,); trunc = trunc)
+    
+    inv_s = pseudopow(S, -0.5)
+    @tensor Proj_1[-1;-2 -3] := R2[1; -2 -3] * adjoint(U)[2; 1] * inv_s[-1; 2]
+
+    #construct projectors for horizontal contraction
+    R3, _ = rightorth(boundbulk_vertical, (1,2), (3,4,5))
+    _, R4 = leftorth(boundbulk_vertical, (1,2,3), (4,5))
+
+    @tensor R3R4[-1; -2] := R4[-1; 1 2] * R3[2 1; -2]
+
+    U, S, V, _ = tsvd(R3R4, (1,), (2,); trunc = trunc)
+    @show maximumer(S)
+    inv_s = pseudopow(S, -0.5)
+    @tensor Proj_2[-1; -2 -3] := R4[1; -2 -3] * adjoint(U)[2 ; 1] * inv_s[-1; 2]
+    @tensor Proj_3[-1 -2; -3] := R3[-1 -2; 1] * adjoint(V)[1; 2] * inv_s[2; -3]
+
+    @tensor new_E[-1 -2 ; -3] := Proj_2[-1; 1 2]* E[2 7; 10] *T[1 4; 8 7] * Proj_1[-2; 3 4] * T[8 3; 6 9] * E[10 9; 5] *Proj_3[5 6; -3]
+    
+    return new_E
+
+end
+ 
+function boundary_subroutine_old(T::TensorMap, E::TensorMap, trunc::TensorKit.TruncationScheme)
     @tensor temp_bound_north[-1 -2 -3; -4] := E[-1 -2; 1]*E[1 -3; -4]
     @tensor temp_bulk[-1 -2 -3; -4 -5 -6] := T[-1 -2; 1 -6]*T[1 -3; -4 -5]
 
     #construct projectors for vertical contraction
     R1, _ = rightorth(temp_bound_north, (2,3), (4,1))
+    
     _, R2 = leftorth(temp_bulk, (1,2,3,4), (5,6))
     R3, _ = rightorth(temp_bulk, (2,3), (4,5,6,1))
+
 
     @tensor R1R2[-1; -2] := R2[-1; 1 2] * R1[2 1; -2]
     @tensor R3R2[-1; -2] := R2[-1; 1 2] * R3[2 1; -2]
 
+
     U, S, V, _ = tsvd(R1R2, (1,), (2,); trunc = trunc)
     inv_s = pseudopow(S, -0.5)
-
+ 
     
     @tensor Proj_1[-1;-2 -3] := R2[1; -2 -3] * adjoint(U)[2; 1] * inv_s[-1; 2]
     @tensor Proj_2[-1 -2;-3] := inv_s[1; -3] * adjoint(V)[2; 1] * R1[-1 -2 ;2]
 
     U, S, V, _ = tsvd(R3R2, (1,), (2,); trunc = trunc)
     inv_s = pseudopow(S, -0.5)
+    
     @tensor Proj_3[-1;-2 -3] := R2[1; -2 -3] * adjoint(U)[2; 1] * inv_s[-1; 2]
     #@tensor Proj_4[-1 -2;-3] := inv_s[1; -3] * adjoint(V)[2; 1] * R3[-1 -2 ;2]
 
@@ -38,6 +74,7 @@ function boundary_subroutine(T::TensorMap, E::TensorMap, trunc::TensorKit.Trunca
     @tensor bulk_env[-1 -2; -3 -4] := temp_bulk[-1 1 2; -3 3 4]*Proj_3[-2; 2 1]*Proj_2[4 3; -4]
     #@tensor bulk_temp[-1 -2; -3 -4] := temp_bulk[-1 1 2; -3 3 4]*Proj_3[-2; 2 1]*Proj_4[4 3; -4]
     
+    @show @tensor bulk_env[1 2; 1 2]
     #contract along the horizontal direction
 
     @tensor another_north[-1 -2 -3; -4 -5] := temp_E1[-1 1; -5]* bulk_env[-2 -3; -4 1]
@@ -106,27 +143,40 @@ function step!(scheme::Boundary_TRG, trunc::TensorKit.TruncationScheme)
     # Contract along the vertical direction
     scheme.E1 = boundary_subroutine(scheme.T, scheme.E1, trunc)
     
-    T_temp_2 = permute(scheme.T, (3,4),(1,2))
-    E_temp = permute(scheme.E2, (2,3),(1,))    
-    E_temp = boundary_subroutine(T_temp_2, E_temp, trunc)
-    scheme.E2 = permute(E_temp, (3,),(1,2))
-    U = isometry(flip(space(scheme.E2)[1]), space(scheme.E2)[1])
-    Udg = adjoint(U)
-    U_intobulk = isometry(flip(space(scheme.E2)[3]), space(scheme.E2)[3])
-    @tensor scheme.E2[-1; -2 -3] := scheme.E2[1; 2 3]*U[-1; 1]*U_intobulk[3; -3]*Udg[2; -2]
+    # T_temp_2 = permute(scheme.T, (3,4),(1,2))
+    # E_temp = permute(scheme.E2, (2,3),(1,))    
+    # E_temp = boundary_subroutine(T_temp_2, E_temp, trunc)
+    # scheme.E2 = permute(E_temp, (3,),(1,2))
+
+    # U = isometry(flip(space(scheme.E2)[1]), space(scheme.E2)[1])
+    # Udg = isometry(flip(space(scheme.E2)[2]), space(scheme.E2)[2])
+    # U_intobulk = isometry(flip(space(scheme.E2)[3]), space(scheme.E2)[3])
+    # @tensor scheme.E2[-1; -2 -3] := scheme.E2[1; 2 3]*U[-1; 1]*U_intobulk[3; -3]*Udg[2; -2]
+    scheme.E2 = adjoint(scheme.E1)
     
-    scheme.T = bulk_subroutine(scheme.T, trunc)
+    scheme.T = bulk_subroutine(scheme.T, trunc)    
     
     return scheme
+end
+
+function maximumer(T::TensorMap)
+    maxi = []
+    for (_, d) in blocks(T)
+        push!(maxi, maximum(abs.(d)))
+    end
+    return maximum(maxi)
 end
 
 function finalize!(scheme::Boundary_TRG)
     Bulk_norm = norm(@tensor scheme.T[1 2; 1 2])
     scheme.T /= Bulk_norm
 
-    Env_norm = norm(@tensor scheme.E1[1 2; 1]*scheme.E2[3; 3 2])
+    Env_norm = norm(@tensor scheme.E1[1 2; 1]*scheme.E2[3;3 2])
     scheme.E1 /= sqrt(Env_norm)
     scheme.E2 /= sqrt(Env_norm)
+
+    @show maximumer(scheme.E1)
+    @show maximumer(scheme.E2)
     return Bulk_norm, sqrt(Env_norm)
 end
 
