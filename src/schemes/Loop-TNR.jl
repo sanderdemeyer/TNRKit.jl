@@ -338,7 +338,12 @@ function loop_opt!(scheme::Loop_TNR, maxsteps_opt::Int, minerror_opt::Float64, d
     return scheme
 end
 
-
+function step!(scheme::Loop_TNR, d_cut::Int, maxsteps::Int, minerror::Float64, maxsteps_opt::Int, minerror_opt::Float64)
+    scheme = entanglement_filtering!(scheme, maxsteps, minerror)
+    scheme = entanglement_filtering!(scheme, maxsteps, minerror)
+    scheme = loop_opt!(scheme, maxsteps_opt, minerror_opt, d_cut)
+    return scheme
+end
 
 function finalize!(scheme::Loop_TNR)
     # n1 = norm(@tensor scheme.TA[1 2; 1 2])
