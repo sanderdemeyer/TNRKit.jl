@@ -309,8 +309,8 @@ function opt_T(N, W)
         @tensor x[-1; -2 -3] := adjoint(N)[-1 1; -2 2]*b[2; 1 -3]
         return x
     end
-
-    new_T, info = lssolve((apply_f), W)
+    
+    new_T, info = lssolve((apply_f), W, LSMR(500, 1e-12, 1))
 
     return new_T
 end
@@ -320,28 +320,28 @@ function loop_opt!(scheme::Loop_TNR, maxsteps_opt::Int, minerror_opt::Float64, d
     psi_B = psiB(scheme, d_cut)
     
     cost = Inf
-    steps = 0
-    while abs(cost) > minerror_opt && steps < maxsteps_opt
+    sweep = 0
+    while abs(cost) > minerror_opt && sweep < maxsteps_opt
         for i = 1:8
             N = tN(i, psi_B)
             W = tW(i, psi_A, psi_B)
             new_T = opt_T(N, W)
             psi_B[i] = new_T
         end
-        steps += 1
-        @show steps
+        sweep += 1
+        @show sweep
         cost = cost_func(1, psi_A, psi_B)
         @show cost
     end
-    @tensor scheme.TA[-1 -2; -3 -4] := psi_B[5][4;-1 1] * psi_B[8][-2; 2 1] * psi_B[1][2; -3 3] * psi_B[4][-4; 4 3]
-    @tensor scheme.TB[-1 -2; -3 -4] := psi_B[2][-1; 1 4] * psi_B[3][1; -2 2] * psi_B[6][-3; 3 2] * psi_B[7][3; -4 4]
+    @tensor scheme.TB[-1 -2; -3 -4] := psi_B[5][4;-1 1] * psi_B[8][-2; 2 1] * psi_B[1][2; -3 3] * psi_B[4][-4; 4 3]
+    @tensor scheme.TA[-1 -2; -3 -4] := psi_B[2][-1; 1 4] * psi_B[3][1; -2 2] * psi_B[6][-3; 3 2] * psi_B[7][3; -4 4]
     return scheme
 end
 
 function step!(scheme::Loop_TNR, d_cut::Int, maxsteps::Int, minerror::Float64, maxsteps_opt::Int, minerror_opt::Float64)
-    scheme = entanglement_filtering!(scheme, maxsteps, minerror)
-    scheme = entanglement_filtering!(scheme, maxsteps, minerror)
-    scheme = loop_opt!(scheme, maxsteps_opt, minerror_opt, d_cut)
+    entanglement_filtering!(scheme, maxsteps, minerror)
+    #entanglement_filtering!(scheme, maxsteps, minerror)
+    loop_opt!(scheme, maxsteps_opt, minerror_opt, d_cut)
     return scheme
 end
 
@@ -355,7 +355,7 @@ function finalize!(scheme::Loop_TNR)
 
     scheme.TA /= n^(1/4)
     scheme.TB /= n^(1/4)
-    return n
+    return n^(1/4)
 end
 
 

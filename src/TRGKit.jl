@@ -1,5 +1,5 @@
 module TRGKit
-    using TensorKit, LinearAlgebra, OMEinsum
+    using TensorKit, LinearAlgebra, OMEinsum, KrylovKit
     using Printf
 
     # stop criteria

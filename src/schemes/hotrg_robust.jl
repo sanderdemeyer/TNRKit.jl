@@ -9,7 +9,7 @@ end
 
 function step!(scheme::HOTRG_robust, trunc::TensorKit.TruncationScheme)
     # Contract along the horizontal direction
-    @tensor M[-1 -2 -3; -4 -5 -6] := scheme.T[-1 1; -5 -6] * scheme.T[-2 -3; -4 1]
+    @tensor opt=true M[-1 -2 -3; -4 -5 -6] := scheme.T[-1 1; -5 -6] * scheme.T[-2 -3; -4 1]
 
     # Get projectors
     _, R1 = leftorth(M, (1,2,3,6), (4,5))
