@@ -57,3 +57,7 @@ for (i,d) in enumerate(data_tnr)
 end
 @show lnz_tnr
 
+using JLD2
+file = jldopen("scheme_data.jld2", "w")
+file["tnr_scheme"] = scheme
+close(file)
