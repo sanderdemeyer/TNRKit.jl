@@ -15,7 +15,7 @@ module TRGKit
     include("schemes/hotrg_robust.jl")
     include("schemes/boundary_trg.jl")
     
-    export TRGScheme, TRG, BTRG, HOTRG, HOTRG_robust, trg_convcrit, btrg_convcrit, Loop_TNR, Boundary_TRG, boundary_subroutine, bulk_subroutine
+    export TRGScheme, TRG, BTRG, ATRG, HOTRG, HOTRG_robust, trg_convcrit, btrg_convcrit, Loop_TNR, Boundary_TRG, boundary_subroutine, bulk_subroutine
     export run!, step!, pseudopow, entanglement_filtering!, find_projectors, make_psi
 
     # models

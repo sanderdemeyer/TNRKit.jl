@@ -24,7 +24,7 @@ using .TRGKit
 
 custom_convcrit(steps::Int, data) = abs(log(data[end]) * 2.0^(1-steps))
 custom_convcrit_hot(steps::Int, data) = abs(log(data[end]) * 2.0^(1-steps))
-χ = 50
+χ = 16
 ms = [0]
 μs = [32]
 
