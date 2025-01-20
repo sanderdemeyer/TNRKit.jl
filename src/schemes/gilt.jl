@@ -1,6 +1,4 @@
-# Graph Independent Local Truncation Hauru Delcamp
-
-mutable struct GILT <: TRGScheme
+mutable struct GILT
     T1::TensorMap
     T2::TensorMap
     T3::TensorMap
@@ -12,14 +10,14 @@ mutable struct GILT <: TRGScheme
     end
 end
 
-function step!(scheme::GILT, trunc::TensorKit.TruncationScheme)
+function _step!(scheme::GILT, trunc::TensorKit.TruncationScheme)
     # Environment: top leg broken
     @tensor E[-1 -2 -3 -4 -5 -6 -7 -8; -9 -10] := scheme.T1[-2 1; -10 -1] *
                                                   scheme.T2[-9 3; -7 -8] *
                                                   scheme.T3[2 -5; -6 3] *
                                                   scheme.T4[-3 -4; 2 1]
     S², U = eigh(adjoint(E) * E)
-
+    @show space(E)
     @plansor t[-1] := U[1 1; -1]
 
     epsid = scheme.ε^2 * id(domain(S²))
@@ -53,8 +51,10 @@ function step!(scheme::GILT, trunc::TensorKit.TruncationScheme)
     U, S, V, _ = tsvd(R′; trunc=trunc)
     sqrtS = sqrt(S)
 
-    @tensor scheme.T2[-1 -2; -3 -4] := scheme.T2[-1 1; -3 -4] * U[2; 1] * sqrtS[-2; 2]
-    @tensor scheme.T3[-1 -2; -3 -4] := sqrtS[2; -4] * V[1; 2] * scheme.T3[-1 -2; -3 1]
+    @tensor scheme.T2[-1 -2; -3 -4] := scheme.T2[-1 1; -3 -4] * V[2; 1] * sqrtS[-2; 2]
+    @tensor scheme.T3[-1 -2; -3 -4] := sqrtS[2; -4] * U[1; 2] * scheme.T3[-1 -2; -3 1]
+    @show space(scheme.T2)
+    @show space(scheme.T3)
 
     # Environment: bottom leg broken
     @tensor E[-1 -2 -3 -4 -5 -6 -7 -8; -9 -10] := scheme.T1[-6 3; 2 -5] *
@@ -99,5 +99,15 @@ function step!(scheme::GILT, trunc::TensorKit.TruncationScheme)
     @tensor scheme.T4[-1 -2; -3 -4] := scheme.T4[-1 -2; -3 1] * U[1; 2] * sqrtS[2; -4]
     @tensor scheme.T1[-1 -2; -3 -4] := sqrtS[-2; 1] * V[1; 2] * scheme.T1[-1 2; -3 -4]
 
-    return scheme
+    return scheme, R′
+end
+
+function Base.show(io::IO, scheme::GILT)
+    println(io, "GILT - Graph Independent Local Truncation")
+    println(io, "  * T1: $(summary(scheme.T1))")
+    println(io, "  * T2: $(summary(scheme.T2))")
+    println(io, "  * T3: $(summary(scheme.T3))")
+    println(io, "  * T4: $(summary(scheme.T4))")
+    println(io, "  * ε: $(scheme.ε)")
+    return nothing
 end
