@@ -52,4 +52,4 @@ function finalize!(scheme::ATRG)
     return n
 end
 
-ATRG_convcrit(steps::Int, data) = abs(log(data[end]) * 2.0^(-steps))
+ATRG_convcrit(steps::Int, data) = abs(log(data[end]) * 2.0^(1-steps))

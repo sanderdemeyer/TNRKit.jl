@@ -55,7 +55,9 @@ function finalize!(scheme::ATRG_3D)
     scheme.T /= n
 
     # turn the tensor by 90 degrees
-    scheme.T = permute(scheme.T, ((2, 4, 3), (5, 1, 6)))
+    scheme.T = permute(scheme.T, ((2, 6, 4), (5, 3, 1)))
 
     return n
 end
+
+ATRG_3D_convcrit(steps::Int, data) = abs(log(data[end]) * 2.0^(1-steps))
