@@ -26,7 +26,7 @@ export run!
 
 # models
 include("models/ising.jl")
-export classical_ising, classical_ising_symmetric, Potts_βc, Ising_βc
+export classical_ising, classical_ising_symmetric, Potts_βc, Ising_βc, f_onsager
 
 include("models/gross-neveu.jl")
 export gross_neveu_start
@@ -34,4 +34,7 @@ export gross_neveu_start
 # utility functions
 include("utility/cft.jl")
 export cft_data, central_charge
+
+include("utility/finalize.jl")
+export finalize!, finalize_two_by_two!
 end
