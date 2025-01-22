@@ -12,6 +12,7 @@ end
 
 struct LoopOptimization
     criterion::stopcrit
+    verbosity::Int
     function LoopOptimization(criterion::stopcrit)
         return new(criterion)
     end
