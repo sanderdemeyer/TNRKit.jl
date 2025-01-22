@@ -1,5 +1,5 @@
 module TRGKit
-using TensorKit, LinearAlgebra
+using TensorKit, LinearAlgebra, KrylovKit
 using LoggingExtras, Printf
 
 # stop criteria
@@ -13,8 +13,9 @@ include("schemes/btrg.jl")
 include("schemes/hotrg.jl")
 include("schemes/gilt.jl")
 include("schemes/atrg.jl")
+include("schemes/loop-tnr.jl")
 
-export TRGScheme, TRG, BTRG, HOTRG, GILT, ATRG, trg_convcrit, btrg_convcrit, hotrg_convcrit,
+export TRGScheme, TRG, BTRG, HOTRG, GILT, ATRG, LoopTNR, trg_convcrit, btrg_convcrit, hotrg_convcrit,
        atrg_convcrit
 export run!
 
@@ -31,4 +32,6 @@ export cft_data, central_charge
 
 include("utility/finalize.jl")
 export finalize!, finalize_two_by_two!
+
+include("utility/tensorkit.jl")
 end

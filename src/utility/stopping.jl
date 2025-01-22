@@ -37,3 +37,15 @@ end
 function stopping_info(crit::convcrit, steps::Int, data)
     return @sprintf "Convergence criterion reached: %.3e ≤ %.3e" crit.f(steps, data) crit.Δ
 end
+
+function Base.summary(crit::maxiter)
+    return "maximum iterations: $(crit.n)"
+end
+
+function Base.summary(crit::convcrit)
+    return "convergence criterion: $(crit.Δ)"
+end
+
+function Base.summary(crit::MultipleCrit)
+    return join(summary.(crit.crits), " & ")
+end

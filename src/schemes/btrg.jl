@@ -14,16 +14,6 @@ end
 # Default implementation using the optimal value for k
 BTRG(T::TensorMap; kwargs...) = BTRG(T, -0.5; kwargs...)
 
-function pseudopow(t::DiagonalTensorMap, a::Real; tol=eps(scalartype(t))^(3 / 4))
-    t′ = copy(t)
-    for (c, b) in blocks(t′)
-        @inbounds for I in LinearAlgebra.diagind(b)
-            b[I] = b[I] < tol ? b[I] : b[I]^a
-        end
-    end
-    return t′
-end
-
 function step!(scheme::BTRG, trunc::TensorKit.TruncationScheme)
     U, S, V, _ = tsvd(scheme.T, ((1, 2), (3, 4)); trunc=trunc)
 
