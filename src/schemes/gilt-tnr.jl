@@ -14,7 +14,7 @@ function step!(scheme::GILTTNR, trunc::TensorKit.TruncationScheme)
     for _ in 1:50 # for now just do 20 steps
         _step!(giltscheme, truncbelow(scheme.ε))
     end
-    
+
     U, S, V, _ = tsvd(giltscheme.T1, ((1, 2), (3, 4)); trunc=trunc)
 
     @plansor begin
