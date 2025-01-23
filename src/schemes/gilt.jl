@@ -22,8 +22,8 @@ function _step!(scheme::GILT, trunc::TensorKit.TruncationScheme)
     U, S, V, _ = tsvd(R′; trunc=trunc)
     sqrtS = sqrt(S)
 
-    @tensor scheme.T1[-1 -2; -3 -4] := scheme.T1[-1 -2; 1 -4] * U[1; 2] * sqrtS[2; -3]
-    @tensor scheme.T2[-1 -2; -3 -4] := sqrtS[-1; 1] * V[1; 2] * scheme.T2[2 -2; -3 -4]
+    @tensor scheme.T2[-1 -2; -3 -4] := scheme.T2[-1 -2; 1 -4] * U[1; 2] * sqrtS[2; -3]
+    @tensor scheme.T1[-1 -2; -3 -4] := sqrtS[-1; 1] * V[1; 2] * scheme.T1[2 -2; -3 -4]
 
     # Environment: right leg broken
     S², U = environment_spectrum(scheme, Val{:E})
@@ -39,8 +39,8 @@ function _step!(scheme::GILT, trunc::TensorKit.TruncationScheme)
     U, S, V, _ = tsvd(R′; trunc=trunc)
     sqrtS = sqrt(S)
 
-    @tensor scheme.T2[-1 -2; -3 -4] := scheme.T2[-1 1; -3 -4] * V[2; 1] * sqrtS[-2; 2]
-    @tensor scheme.T1[-1 -2; -3 -4] := sqrtS[2; -4] * U[1; 2] * scheme.T1[-1 -2; -3 1]
+    @tensor scheme.T1[-1 -2; -3 -4] := scheme.T1[-1 1; -3 -4] * V[2; 1] * sqrtS[-2; 2]
+    @tensor scheme.T2[-1 -2; -3 -4] := sqrtS[2; -4] * U[1; 2] * scheme.T2[-1 -2; -3 1]
 
     # Environment: bottom leg broken
     S², U = environment_spectrum(scheme, Val{:S})
@@ -56,8 +56,8 @@ function _step!(scheme::GILT, trunc::TensorKit.TruncationScheme)
     U, S, V, _ = tsvd(R′; trunc=trunc)
     sqrtS = sqrt(S)
 
-    @tensor scheme.T2[-1 -2; -3 -4] := sqrtS[-1; 1] * U[1; 2] * scheme.T2[2 -2; -3 -4]
-    @tensor scheme.T1[-1 -2; -3 -4] := V[1; 2] * sqrtS[2; -3] * scheme.T1[-1 -2; 1 -4]
+    @tensor scheme.T1[-1 -2; -3 -4] := sqrtS[1; -3] * U[2; 1] * scheme.T1[-1 -2; 2 -4]
+    @tensor scheme.T2[-1 -2; -3 -4] := sqrtS[-1; 1] * V[1; 2] * scheme.T2[2 -2; -3 -4]
 
     # Environment: left leg broken
     S², U = environment_spectrum(scheme, Val{:W})
@@ -72,8 +72,8 @@ function _step!(scheme::GILT, trunc::TensorKit.TruncationScheme)
     U, S, V, _ = tsvd(R′; trunc=trunc)
     sqrtS = sqrt(S)
 
-    @tensor scheme.T2[-1 -2; -3 -4] := scheme.T2[-1 -2; -3 1] * U[1; 2] * sqrtS[2; -4] # space mismatch
-    @tensor scheme.T1[-1 -2; -3 -4] := sqrtS[-2; 1] * V[1; 2] * scheme.T1[-1 2; -3 -4]
+    @tensor scheme.T1[-1 -2; -3 -4] := scheme.T1[-1 -2; -3 1] * U[1; 2] * sqrtS[2; -4] # space mismatch
+    @tensor scheme.T2[-1 -2; -3 -4] := sqrtS[-2; 1] * V[1; 2] * scheme.T2[-1 2; -3 -4]
 
     return scheme, R′
 end

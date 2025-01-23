@@ -2,20 +2,19 @@ mutable struct GILTTNR <: TRGScheme
     T::TensorMap
 
     ε::Float64
-    function GILTTNR(T::TensorMap; ε=5e-8)
-        return new(copy(T), ε)
+    finalize!::Function
+    function GILTTNR(T::TensorMap; ε=5e-8, finalize=finalize!)
+        return new(copy(T), ε, finalize)
     end
 end
 
 function step!(scheme::GILTTNR, trunc::TensorKit.TruncationScheme)
     # step 1: GILT
     giltscheme = GILT(scheme.T; ε=scheme.ε)
-    for i in 1:20 # for now just do 20 steps
-        @show i
+    for _ in 1:50 # for now just do 20 steps
         _step!(giltscheme, truncbelow(scheme.ε))
     end
     
-    @info "passed gilt"
     U, S, V, _ = tsvd(giltscheme.T1, ((1, 2), (3, 4)); trunc=trunc)
 
     @plansor begin
