@@ -2,18 +2,38 @@ mutable struct GILTTNR <: TRGScheme
     T::TensorMap
 
     ε::Float64
+    giltcrit::stopcrit
     finalize!::Function
-    function GILTTNR(T::TensorMap; ε=5e-8, finalize=finalize!)
-        return new(copy(T), ε, finalize)
+    function GILTTNR(T::TensorMap; ε=5e-8, giltcrit=maxiter(20), giltverbosity=0,
+                     finalize=finalize!)
+        return new(copy(T), ε, giltcrit, giltverbosity, finalize)
     end
 end
 
 function step!(scheme::GILTTNR, trunc::TensorKit.TruncationScheme)
     # step 1: GILT
     giltscheme = GILT(scheme.T; ε=scheme.ε)
-    for _ in 1:50 # for now just do 20 steps
-        _step!(giltscheme, truncbelow(scheme.ε))
+
+    gilt_steps = 0
+    R = id(space(scheme.T, 4)')
+    crit = true
+    n = Inf
+
+    @infov 3 "Starting GILT\n$(giltscheme)\n"
+    t = @elapsed while crit
+        _, R′ = _step!(giltscheme, truncbelow(scheme.ε))
+
+        gilt_steps += 1
+        if space(R) == space(R′)
+            n = norm(R - R′)
+        else
+            n = Inf
+        end
+        crit = scheme.giltcrit(gilt_steps, n)
+        @infov 4 "GILT step $gilt_steps, norm: $n"
+        R = R′
     end
+    @infov 3 "GILT finished\n $(stopping_info(scheme.giltcrit, gilt_steps, n))\n Elapsed time: $(t)s\n Iterations: $gilt_steps"
 
     U, S, V, _ = tsvd(giltscheme.T1, ((1, 2), (3, 4)); trunc=trunc)
 

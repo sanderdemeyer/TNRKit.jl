@@ -5,6 +5,7 @@ using LoggingExtras, Printf
 # stop criteria
 include("utility/stopping.jl")
 export maxiter, convcrit
+export trivial_convcrit
 
 # schemes
 include("schemes/trgscheme.jl")
