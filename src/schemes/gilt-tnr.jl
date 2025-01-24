@@ -4,9 +4,8 @@ mutable struct GILTTNR <: TRGScheme
     ε::Float64
     giltcrit::stopcrit
     finalize!::Function
-    function GILTTNR(T::TensorMap; ε=5e-8, giltcrit=maxiter(20), giltverbosity=0,
-                     finalize=finalize!)
-        return new(copy(T), ε, giltcrit, giltverbosity, finalize)
+    function GILTTNR(T::TensorMap; ε=5e-8, giltcrit=maxiter(20), finalize=finalize!)
+        return new(copy(T), ε, giltcrit, finalize)
     end
 end
 
