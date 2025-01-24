@@ -1,7 +1,8 @@
 using Revise, TensorKit, DataFrames, CSV
 includet("../src/TRGKit.jl")
 using .TRGKit
-
+using LinearAlgebra
+BLAS.set_num_threads(20)
 # function fermionic_trg_finalize!(scheme::TRGScheme)
 #     n = norm(@tensor scheme.T[1 2; 1 2])
 #     scheme.T /= n
@@ -24,22 +25,27 @@ using .TRGKit
 
 custom_convcrit(steps::Int, data) = abs(log(data[end]) * 2.0^(1-steps))
 custom_convcrit_hot(steps::Int, data) = abs(log(data[end]) * 2.0^(1-steps))
-χ = 16
+χ = 32
 ms = [0]
 μs = [32]
 
+
 for m in ms
     #lnz_trgs = []
-    lnz_btrgs = []
+    #lnz_btrgs = []   
     #lnz_hotrgs = []
     for μ in μs
-        T = Hubbard2D_start(μ, 1, 0.0001, 4)
+        T = Hubbard2D_start(8, 1,0.0001, 4)
         #trg = TRG(copy(T))
-        btrg = BTRG(copy(T))
+        #btrg = BTRG(copy(T))
+        atrg = ATRG(copy(T))
         #hotrg = HOTRG(copy(T))
-        #data_trg = run!(trg, truncdim(χ), convcrit(1e-20, custom_convcrit))
-        data_btrg = run!(btrg, truncdim(χ), convcrit(1e-15, custom_convcrit))
+        #data_trg = run!(trg, truncdim(χ), convcrit(1e-15, custom_convcrit))
+        #data_btrg = run!(btrg, truncdim(χ), convcrit(1e-15, custom_convcrit))
+        data_atrg = run!(atrg, truncdim(χ), convcrit(1e-15, custom_convcrit))
         #data_hotrg = run!(hotrg, truncdim(χ), convcrit(1e-20, custom_convcrit_hot))
+
+        
 
         # lnz_trg = 0
         # for (i, d) in enumerate(data_trg)
@@ -47,12 +53,17 @@ for m in ms
         # end
         # @show lnz_trg
 
-        lnz_btrg = 0
-        for (i, d) in enumerate(data_btrg)
-            lnz_btrg += log(d) * 2.0^(1-i)
+        # lnz_btrg = 0
+        # for (i, d) in enumerate(data_btrg)
+        #     lnz_btrg += log(d) * 2.0^(1-i)
+        # end
+        # @show lnz_btrg
+
+        lnz_atrg = 0
+        for (i, d) in enumerate(data_atrg)
+            lnz_atrg += log(d) * 2.0^(1-i)
         end
-        @show μ  
-        @show lnz_btrg
+        @show lnz_atrg
         # lnz_hotrg = 0
         # for (i, d) in enumerate(data_hotrg)
         #     lnz_hotrg += log(d) * 2.0^(1-i)

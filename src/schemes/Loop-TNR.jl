@@ -9,7 +9,7 @@ mutable struct Loop_TNR <: TRGScheme
     end
 end
 
-Base.ndims(::AbstractTensorMap{S,N1,N2}) where {S,N1,N2} = N1 + N2
+# Base.ndims(::AbstractTensorMap{S,N1,N2}) where {S,N1,N2} = N1 + N2
 
 
 function psiA_old(scheme::Loop_TNR)
@@ -157,26 +157,7 @@ function find_projectors(psi::Array, maxsteps::Int, minerror::Float64)
     return PR_list, PL_list
 end
 
-# function entanglement_filtering!(scheme::Loop_TNR, maxsteps::Int, minerror::Float64)
-#     psi = psiA_old(scheme)
 
-
-#     PR_list, PL_list = find_projectors(psi, maxsteps, minerror)
-
-#     @tensor psi1[-1 -2; -3 -4] := psi[1][1 2; 3 4]*PL_list[3][-1;1]*PL_list[1][-2;2]*PR_list[2][3; -3]*PR_list[4][4; -4]
-#     TA = permute(psi1, (4,2),(3,1))
-#     @tensor psi2[-1 -2; -3 -4] := psi[2][1 2; 3 4]*PL_list[4][-1; 1]*PL_list[2][-2; 2]*PR_list[3][3;-3]*PR_list[1][4;-4]
-
-#     TB = permute(psi2, (2,3),(1,4))
-#     U1 = isometry(flip(space(TA)[1]),space(TA)[1])
-#     Udg1 = adjoint(U1)
-#     U2 = isometry(flip(space(TB)[2]),space(TB)[2])
-#     Udg2 = adjoint(U2)
-
-#     @tensor scheme.TA[-1 -2; -3 -4] := TA[1 -2; -3 4]*U1[-1;1]*Udg2[4; -4]
-#     @tensor scheme.TB[-1 -2; -3 -4] := TB[-1 2; 3 -4]*U2[-2; 2]*Udg1[3; -3]
-#     return scheme
-# end
 
 function entanglement_filtering!(scheme::Loop_TNR, maxsteps::Int, minerror::Float64)
     psi = psiA_new(scheme)
@@ -186,13 +167,6 @@ function entanglement_filtering!(scheme::Loop_TNR, maxsteps::Int, minerror::Floa
     TA = copy(scheme.TA)
     TB = copy(scheme.TB)
 
-    # U1 = isometry(flip(space(TA)[1]), space(TA)[1])
-    # Udg1 = adjoint(U1)
-    # U2 = isometry(flip(space(TB)[2]), space(TB)[2])
-    # Udg2 = adjoint(U2)
-
-    # @tensor scheme.TA[-1 -2; -3 -4] := TA[1 2; 3 4] * PR_list[4][1; 5] * Udg1[5; -1] * PL_list[1][-2; 2] * PR_list[2][3; -3] * PL_list[3][6; 4] * U2[-4; 6]
-    # @tensor scheme.TB[-1 -2; -3 -4] := TB[1 2; 3 4] * PL_list[2][-1; 1] * PR_list[3][2; 5] * Udg2[5; -2] * PL_list[4][6; 3] * U1[-3; 6] * PR_list[1][4; -4]
     @tensor scheme.TA[-1 -2; -3 -4] := TA[1 2; 3 4] * PR_list[4][1; -1] * PL_list[1][-2; 2] * PR_list[2][3; -3] * PL_list[3][-4; 4] 
     @tensor scheme.TB[-1 -2; -3 -4] := TB[1 2; 3 4] * PL_list[2][-1; 1] * PR_list[3][2; -2]  * PL_list[4][-3; 3]  * PR_list[1][4; -4]
 
@@ -312,6 +286,10 @@ function opt_T(N, W)
     
     new_T, info = lssolve((apply_f), W, LSMR(500, 1e-12, 1))
 
+
+    #new_N = permute(N, (1,3), (2, 4))
+    #new_inv_N = permute(pinv(new_N), (4,2), (3,1))
+    #@tensor psi_B[pos][-1; -2 -3] := new_inv_N[-1 1; -2 2] * W[2; 1 -3]
     return new_T
 end
 
@@ -325,16 +303,18 @@ function loop_opt!(scheme::Loop_TNR, maxsteps_opt::Int, minerror_opt::Float64, d
         for i = 1:8
             N = tN(i, psi_B)
             W = tW(i, psi_A, psi_B)
-            new_T = opt_T(N, W)
-            psi_B[i] = new_T
+            new_N = permute(N, (1,3), (2, 4))
+            new_inv_N = permute(pinv(new_N), (4,2), (3,1))
+            #new_T = opt_T(N, W)
+            @tensor psi_B[i][-1; -2 -3] := new_inv_N[-1 1; -2 2] * W[2; 1 -3]
         end
         sweep += 1
         @show sweep
         cost = cost_func(1, psi_A, psi_B)
         @show cost
     end
-    @tensor scheme.TB[-1 -2; -3 -4] := psi_B[5][4;-1 1] * psi_B[8][-2; 2 1] * psi_B[1][2; -3 3] * psi_B[4][-4; 4 3]
-    @tensor scheme.TA[-1 -2; -3 -4] := psi_B[2][-1; 1 4] * psi_B[3][1; -2 2] * psi_B[6][-3; 3 2] * psi_B[7][3; -4 4]
+    @tensor scheme.TA[-1 -2; -3 -4] := psi_B[5][4;-1 1] * psi_B[8][-2; 2 1] * psi_B[1][2; -3 3] * psi_B[4][-4; 4 3]
+    @tensor scheme.TB[-1 -2; -3 -4] := psi_B[2][-1; 1 4] * psi_B[3][1; -2 2] * psi_B[6][-3; 3 2] * psi_B[7][3; -4 4]
     return scheme
 end
 
@@ -346,11 +326,7 @@ function step!(scheme::Loop_TNR, d_cut::Int, maxsteps::Int, minerror::Float64, m
 end
 
 function finalize!(scheme::Loop_TNR)
-    # n1 = norm(@tensor scheme.TA[1 2; 1 2])
-    # n2 = norm(@tensor scheme.TB[1 2; 1 2])
-    # scheme.TA /= n1
-    # scheme.TB /= n2
-    # return n1, n2
+    
     n = norm(@tensor opt=true scheme.TA[1 2; 3 4]*scheme.TB[3 5; 1 6]*scheme.TB[7 4; 8 2]*scheme.TA[8 6; 7 5])
 
     scheme.TA /= n^(1/4)

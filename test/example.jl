@@ -12,14 +12,14 @@ stopping_criterion = convcrit(1e-20, trg_f)&maxiter(50)
 
 # initialize the TRG scheme
 Ising_βc = log(1.0 + sqrt(2)) / 2.0
-scheme_trg = TRG(classical_ising_symmetric(1))
+scheme_trg = TRG(gross_neveu_start(0,0,0))
 
 # run the TRG scheme (and normalize and store the norm in the beginning (finalize_beginning=true))
 data_trg = run!(scheme_trg, truncdim(16), stopping_criterion; finalize_beginning=true)
 # or: data = run!(scheme, truncdim(16)), this will default to maxiter(100)
 lnz_trg = 0
 for (i, d) in enumerate(data_trg)
-    lnz_trg += log(d) * 2.0^((-i))        
+    lnz_trg += log(d) * 2.0^((1-i))        
 end
 @show lnz_trg
 
@@ -34,7 +34,8 @@ for (i, d) in enumerate(data_robust)
 end
 @show lnz_robust
 
-scheme = Loop_TNR(classical_ising_symmetric(Ising_βc),classical_ising_symmetric(Ising_βc))
+
+scheme = Loop_TNR(gross_neveu_start(0,0,0), gross_neveu_start(0,0,0))
 data_tnr = []
 @info "Finalizing beginning"
 push!(data_tnr, scheme.finalize!(scheme))
@@ -57,6 +58,13 @@ for (i,d) in enumerate(data_tnr)
 end
 @show lnz_tnr
 
+@tensor opt=true transfer_ten[-1 -2; -3 -4] := scheme.TA[-1 1; 2 5]*scheme.TB[2 3; -3 6]*scheme.TB[-2 5; 4 1]*scheme.TA[4 6; -4 3]
+D, V = eig(transfer_ten)
+diag = []
+for (i,d) in blocks(D)
+    push!(diag, d...)
+end
+diag = sort!(real(diag))
 using JLD2
 file = jldopen("scheme_data.jld2", "w")
 file["tnr_scheme"] = scheme
