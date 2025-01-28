@@ -167,8 +167,8 @@ function entanglement_filtering!(scheme::Loop_TNR, maxsteps::Int, minerror::Floa
     TA = copy(scheme.TA)
     TB = copy(scheme.TB)
 
-    @tensor scheme.TA[-1 -2; -3 -4] := TA[1 2; 3 4] * PR_list[4][1; -1] * PL_list[1][-2; 2] * PR_list[2][3; -3] * PL_list[3][-4; 4] 
-    @tensor scheme.TB[-1 -2; -3 -4] := TB[1 2; 3 4] * PL_list[2][-1; 1] * PR_list[3][2; -2]  * PL_list[4][-3; 3]  * PR_list[1][4; -4]
+    @tensor scheme.TA[-1 -2; -3 -4] := TA[1 2; 3 4] * PR_list[4][1; -1] * PL_list[1][-2; 2] * PR_list[2][3; -3] * PL_list[3][-4; 4]
+    @tensor scheme.TB[-1 -2; -3 -4] := TB[1 2; 3 4] * PL_list[2][-1; 1] * PR_list[3][2; -2] * PL_list[4][-3; 3] * PR_list[1][4; -4]
 
     return scheme
 end
@@ -191,7 +191,7 @@ function one_loop_projector(phi::Array, pos::Int)
 end
 
 function SVD12(T::AbstractTensorMap{E,S,1,3}, d_cut::Int) where {E,S}
-    U, s, V, _ = tsvd(T, (1, 4), (2, 3), trunc = truncdim(d_cut))
+    U, s, V, _ = tsvd(T, (1, 4), (2, 3), trunc=truncdim(d_cut))
     @tensor S1[-1; -2 -3] := U[-1 -3; 1] * sqrt(s)[1; -2]
     @tensor S2[-1; -2 -3] := sqrt(s)[-1; 1] * V[1; -2 -3]
     return S1, S2
@@ -200,12 +200,12 @@ end
 
 function psiB(scheme::Loop_TNR, d_cut::Int)
     psiA = psiA_new(scheme)
-    psi = psiA_new(scheme)
+    
     psiB_new = []
 
     for i = 1:4
         s1, s2 = SVD12(psiA[i], d_cut)
-        phi = copy(psi)
+        phi = deepcopy(psiA)
         popat!(phi, i)
         insert!(phi, i, s1)
         insert!(phi, i + 1, s2)
@@ -234,7 +234,7 @@ function const_C(psiA)
 end
 
 function tN(pos, psiB)
-    @tensor tmp[-1 -2; -3 -4] := psiB[mod(pos, 8)+1][-1; -3 1]*adjoint(psiB[mod(pos, 8)+1])[-4 1; -2]
+    @tensor tmp[-1 -2; -3 -4] := psiB[mod(pos, 8)+1][-1; -3 1] * adjoint(psiB[mod(pos, 8)+1])[-4 1; -2]
     for i = pos+1:pos+6
         @tensor tmp[-1 -2; -3 -4] := tmp[-1 -2; 1 2] * psiB[mod(i, 8)+1][1; -3 3] * adjoint(psiB[mod(i, 8)+1])[-4 3; 2]
     end
@@ -242,18 +242,18 @@ function tN(pos, psiB)
 end
 
 function tW(pos, psiA, psiB)
-    next_a = mod(ceil(Int, pos/2), 4) + 1
-    next_b = mod(2*ceil(Int, pos/2) + 1, 8)
-    
-    @tensor tmp[-1 -2; -3 -4] := psiA[next_a][-1; -3 1 2] * adjoint(psiB[next_b])[3 2;-2] * adjoint(psiB[next_b + 1])[-4 1; 3]
-    for i = next_a: next_a + 1
-        @tensor tmp[-1 -2; -3 -4] := tmp[-1 -2; 1 2] * psiA[mod(i,4) + 1][1; -3 3 4] * adjoint(psiB[2*(mod(i,4) + 1) - 1])[5 4; 2]* adjoint(psiB[2*(mod(i,4) + 1)])[-4 3; 5]
+    next_a = mod(ceil(Int, pos / 2), 4) + 1
+    next_b = mod(2 * ceil(Int, pos / 2) + 1, 8)
+
+    @tensor tmp[-1 -2; -3 -4] := psiA[next_a][-1; -3 1 2] * adjoint(psiB[next_b])[3 2; -2] * adjoint(psiB[next_b+1])[-4 1; 3]
+    for i = next_a:next_a+1
+        @tensor tmp[-1 -2; -3 -4] := tmp[-1 -2; 1 2] * psiA[mod(i, 4)+1][1; -3 3 4] * adjoint(psiB[2*(mod(i, 4)+1)-1])[5 4; 2] * adjoint(psiB[2*(mod(i, 4)+1)])[-4 3; 5]
     end
 
     if pos % 2 == 0
-        @tensor W[-1;-2 -3] := tmp[1 -1; 2 3] * psiA[ceil(Int, pos/2)][2; 1 -3 4] *adjoint(psiB[pos - 1])[-2 4; 3]
+        @tensor W[-1; -2 -3] := tmp[1 -1; 2 3] * psiA[ceil(Int, pos / 2)][2; 1 -3 4] * adjoint(psiB[pos-1])[-2 4; 3]
     else
-        @tensor W[-1; -2 -3] := tmp[1 3; 2 -2] * psiA[ceil(Int, pos/2)][2; 1 4 -3] *adjoint(psiB[pos + 1])[3 4; -1]
+        @tensor W[-1; -2 -3] := tmp[1 3; 2 -2] * psiA[ceil(Int, pos / 2)][2; 1 4 -3] * adjoint(psiB[pos+1])[3 4; -1]
     end
 
     return W
@@ -262,12 +262,12 @@ end
 function cost_func(pos, psiA, psiB)
     C = const_C(psiA)
     N = tN(pos, psiB)
-    TNT = norm(@tensor N[1 2; 3 4]* psiB[pos][3; 1 5] * adjoint(psiB[pos])[2 5; 4])
+    TNT = norm(@tensor N[1 2; 3 4] * psiB[pos][3; 1 5] * adjoint(psiB[pos])[2 5; 4])
     W = tW(pos, psiA, psiB)
     WdT = norm(@tensor W[3; 1 2] * adjoint(psiB[pos])[3 2; 1])
-    dWT = norm(@tensor adjoint(W)[1 2; 3]*psiB[pos][1; 3 2])
-    
-    return C + TNT - WdT - dWT
+    dWT = norm(@tensor adjoint(W)[1 2; 3] * psiB[pos][1; 3 2])
+
+    return (C + TNT - WdT - dWT)/C
 end
 
 #optimization
@@ -276,14 +276,14 @@ end
 function opt_T(N, W)
 
     function apply_f(x::TensorMap, ::Val{false})
-        @tensor b[-1; -2 -3] := N[1 -1; 2 -2]*x[2;1 -3]
+        @tensor b[-1; -2 -3] := N[1 -1; 2 -2] * x[2; 1 -3]
         return b
     end
     function apply_f(b::TensorMap, ::Val{true})
-        @tensor x[-1; -2 -3] := adjoint(N)[-1 1; -2 2]*b[2; 1 -3]
+        @tensor x[-1; -2 -3] := adjoint(N)[-1 1; -2 2] * b[2; 1 -3]
         return x
     end
-    
+
     new_T, info = lssolve((apply_f), W, LSMR(500, 1e-12, 1))
 
 
@@ -293,19 +293,47 @@ function opt_T(N, W)
     return new_T
 end
 
+
+function opt_T(N, W, psi)
+    # function apply_f(x::TensorMap, ::Val{false})
+    #     @tensor b[-1; -2 -3] := N[1 -1; 2 -2] * x[2; 1 -3]
+    #     return b
+    # end
+    # function apply_f(b::TensorMap, ::Val{true})
+    #     new_N = permute(N, (1,3), (2, 4))
+    #     new_adj_N = permute(adjoint(new_N), (4,2), (3,1))
+    #     @tensor x[-1; -2 -3] := new_adj_N[-1 1; -2 2] * b[2; 1 -3]
+    #     return x
+    # end
+    #W = permute(W, (2,), (1,3))
+    function apply_f(x::TensorMap)
+        N = permute(N, (1, 3), (2, 4))
+        @tensor b[-2; -1 -3] := N[1 2; -1 -2] * x[2; 1 -3]
+        return b
+    end
+
+    #new_T, info = linsolve(apply_f, W, psi)
+
+    new_N = permute(N, (1, 3), (2, 4))
+    new_inv_N = permute(pinv(new_N), (4, 2), (3, 1))
+    @tensor new_T[-1; -2 -3] := new_inv_N[-1 1; -2 2] * W[2; 1 -3]
+    return new_T
+end
+
 function loop_opt!(scheme::Loop_TNR, maxsteps_opt::Int, minerror_opt::Float64, d_cut::Int)
     psi_A = psiA_new(scheme)
     psi_B = psiB(scheme, d_cut)
-    
+
     cost = Inf
     sweep = 0
     while abs(cost) > minerror_opt && sweep < maxsteps_opt
-        for i = 1:8
+        for i in 1:8
             N = tN(i, psi_B)
             W = tW(i, psi_A, psi_B)
-            new_N = permute(N, (1,3), (2, 4))
-            new_inv_N = permute(pinv(new_N), (4,2), (3,1))
-            #new_T = opt_T(N, W)
+            # new_T = opt_T(N, W, psi_B[i])
+            # psi_B[i] = new_T
+            new_N = permute(N, (1, 3), (2, 4))
+            new_inv_N = permute(pinv(new_N), (4, 2), (3, 1))
             @tensor psi_B[i][-1; -2 -3] := new_inv_N[-1 1; -2 2] * W[2; 1 -3]
         end
         sweep += 1
@@ -313,27 +341,27 @@ function loop_opt!(scheme::Loop_TNR, maxsteps_opt::Int, minerror_opt::Float64, d
         cost = cost_func(1, psi_A, psi_B)
         @show cost
     end
-    @tensor scheme.TA[-1 -2; -3 -4] := psi_B[5][4;-1 1] * psi_B[8][-2; 2 1] * psi_B[1][2; -3 3] * psi_B[4][-4; 4 3]
-    @tensor scheme.TB[-1 -2; -3 -4] := psi_B[2][-1; 1 4] * psi_B[3][1; -2 2] * psi_B[6][-3; 3 2] * psi_B[7][3; -4 4]
+    @tensor scheme.TA[-1 -2; -3 -4] := psi_B[5][4; -1 1] * psi_B[8][-2; 2 1] *
+                                       psi_B[1][2; -3 3] * psi_B[4][-4; 4 3]
+    @tensor scheme.TB[-1 -2; -3 -4] := psi_B[2][-1; 1 4] * psi_B[3][1; -2 2] *
+                                       psi_B[6][-3; 3 2] * psi_B[7][3; -4 4]
     return scheme
 end
 
-function step!(scheme::Loop_TNR, d_cut::Int, maxsteps::Int, minerror::Float64, maxsteps_opt::Int, minerror_opt::Float64)
+function step!(scheme::Loop_TNR, d_cut::Int, maxsteps::Int, minerror::Float64,
+    maxsteps_opt::Int, minerror_opt::Float64)
     entanglement_filtering!(scheme, maxsteps, minerror)
-    #entanglement_filtering!(scheme, maxsteps, minerror)
     loop_opt!(scheme, maxsteps_opt, minerror_opt, d_cut)
     return scheme
 end
 
 function finalize!(scheme::Loop_TNR)
-    
-    n = norm(@tensor opt=true scheme.TA[1 2; 3 4]*scheme.TB[3 5; 1 6]*scheme.TB[7 4; 8 2]*scheme.TA[8 6; 7 5])
+    n = norm(@plansor opt = true scheme.TA[1 2; 3 4] * scheme.TB[3 5; 1 6] *
+                                scheme.TB[7 4; 8 2] * scheme.TA[8 6; 7 5])
 
-    scheme.TA /= n^(1/4)
-    scheme.TB /= n^(1/4)
-    return n^(1/4)
+    scheme.TA /= n^(1 / 4)
+    scheme.TB /= n^(1 / 4)
+    return n^(1 / 4)
 end
-
-
 
 
