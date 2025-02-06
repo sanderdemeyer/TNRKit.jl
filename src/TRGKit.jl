@@ -16,7 +16,7 @@ module TRGKit
     include("schemes/boundary_trg.jl")
     include("schemes/Anisotropic_trg.jl")
     
-    export TRGScheme, TRG, BTRG, ATRG, HOTRG, HOTRG_robust, trg_convcrit, btrg_convcrit, Loop_TNR, Boundary_TRG, boundary_subroutine, bulk_subroutine
+    export TRGScheme, TRG, BTRG, ATRG, ATRG_3D, HOTRG, HOTRG_robust, trg_convcrit, btrg_convcrit, Loop_TNR, Boundary_TRG, boundary_subroutine, bulk_subroutine
     export run!, step!, pseudopow, entanglement_filtering!, find_projectors, make_psi
 
     # models

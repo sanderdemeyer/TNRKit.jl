@@ -54,7 +54,7 @@ steps = 0
 crit = true
 while crit
     @info "Step $(steps + 1), data_tnr[end]: $(!isempty(data_tnr) ? data_tnr[end] : "empty")"
-    step!(scheme, 16, 100, 1e-20, 50, 1e-12)
+    step!(scheme, 16, 100, 1e-20, 50, 1e-5)
     push!(data_tnr, scheme.finalize!(scheme))
     steps += 1
     crit = stopping_criterion_tnr(steps, data_tnr)
@@ -74,6 +74,6 @@ for (i,d) in blocks(D)
 end
 diag = sort!(real(diag))
 using JLD2
-file = jldopen("scheme_data.jld2", "w")
+file = jldopen("tnr_ising.jld2", "w")
 file["tnr_scheme"] = scheme
 close(file)
