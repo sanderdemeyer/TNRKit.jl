@@ -4,7 +4,8 @@ mutable struct GILTTNR <: TNRScheme
     ε::Float64
     giltcrit::stopcrit
     finalize!::Function
-    function GILTTNR(T::TensorMap; ε=5e-8, giltcrit=trivial_convcrit(1e-2), finalize=finalize!)
+    function GILTTNR(T::TensorMap; ε=5e-8, giltcrit=trivial_convcrit(1e-2),
+                     finalize=finalize!)
         return new(copy(T), ε, giltcrit, finalize)
     end
 end
@@ -22,7 +23,7 @@ function step!(scheme::GILTTNR, trunc::TensorKit.TruncationScheme)
         _, ns = _step!(giltscheme, truncbelow(scheme.ε))
 
         gilt_steps += 1
-        
+
         crit = scheme.giltcrit(gilt_steps, maximum(ns))
         @infov 4 "GILT step $gilt_steps, norms: $ns"
     end
