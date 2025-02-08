@@ -4,7 +4,7 @@ mutable struct GILTTNR <: TNRScheme
     ε::Float64
     giltcrit::stopcrit
     finalize!::Function
-    function GILTTNR(T::TensorMap; ε=5e-8, giltcrit=trivial_convcrit(1e-2),
+    function GILTTNR(T::TensorMap; ε=5e-8, giltcrit=trivial_convcrit(1e-2)&maxiter(50),
                      finalize=finalize!)
         return new(copy(T), ε, giltcrit, finalize)
     end
