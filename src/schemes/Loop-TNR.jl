@@ -39,25 +39,25 @@ function QR_R(R::TensorMap, T::AbstractTensorMap{S,2,2}) where {S}
 end
 
 function QR_L(L::TensorMap, T::AbstractTensorMap{S,1,3}) where {S}
-    @tensor temp[-1; -2 -3 -4] := L[-1; 1] * T[1; -2 -3 -4]
+    @plansor temp[-1; -2 -3 -4] := L[-1; 1] * T[1; -2 -3 -4]
     _, Rt = leftorth(temp, (1, 3, 4), (2,))
     return Rt
 end
 
 function QR_R(R::TensorMap, T::AbstractTensorMap{S,1,3}) where {S}
-    @tensor temp[-1; -2 -3 -4] := T[-1; 1 -3 -4] * R[1; -2]
+    @plansor temp[-1; -2 -3 -4] := T[-1; 1 -3 -4] * R[1; -2]
     Lt, _ = rightorth(temp, (1,), (2, 3, 4))
     return Lt
 end
 
 function QR_L(L::TensorMap, T::AbstractTensorMap{S,1,2}) where {S}
-    @tensor temp[-1; -2 -3] := L[-1; 1] * T[1; -2 -3]
+    @plansor temp[-1; -2 -3] := L[-1; 1] * T[1; -2 -3]
     _, Rt = leftorth(temp, (1, 3), (2,))
     return Rt
 end
 
 function QR_R(R::TensorMap, T::AbstractTensorMap{S,1,2}) where {S}
-    @tensor temp[-1; -2 -3] := T[-1; 1 -3] * R[1; -2]
+    @plansor temp[-1; -2 -3] := T[-1; 1 -3] * R[1; -2]
     Lt, _ = rightorth(temp, (1,), (2, 3))
     return Lt
 end
@@ -129,12 +129,12 @@ end
 
 
 function P_decomp(R::TensorMap, L::TensorMap)
-    @tensor temp[-1; -2] := L[-1; 1] * R[1; -2]
+    @plansor temp[-1; -2] := L[-1; 1] * R[1; -2]
     U, S, V, _ = tsvd(temp, (1,), (2,))
     re_sq = pseudopow(S, -0.5)
 
-    @tensor PR[-1; -2] := R[-1, 1] * adjoint(V)[1; 2] * re_sq[2, -2]
-    @tensor PL[-1; -2] := re_sq[-1, 1] * adjoint(U)[1; 2] * L[2, -2]
+    @plansor PR[-1; -2] := R[-1; 1] * adjoint(V)[1; 2] * re_sq[2; -2]
+    @plansor PL[-1; -2] := re_sq[-1; 1] * adjoint(U)[1; 2] * L[2; -2]
 
     return PR, PL
 end
@@ -252,21 +252,21 @@ function tW(pos, psiA, psiB)
     tmp = permute(tmp, (2, 1), (4, 3))
     for i = next_a:next_a+1
         ΨA = permute(psiA[mod(i, 4)+1], (1,), (4, 3, 2))
-        ΨB1 = permute(psiB[2*(mod(i, 4)+1)-1], (1,), (3,2))
-        ΨB2 = permute(psiB[2*(mod(i, 4)+1)], (1,), (3,2))
-        @plansor tmp[-1 -2; -3 -4] := tmp[-1 1; -3 4] * ΨA[1; 2 3 -2] * conj(ΨB1[4; 2 5]) * conj(ΨB2[5;3 -4])
+        ΨB1 = permute(psiB[2*(mod(i, 4)+1)-1], (1,), (3, 2))
+        ΨB2 = permute(psiB[2*(mod(i, 4)+1)], (1,), (3, 2))
+        @plansor tmp[-1 -2; -3 -4] := tmp[-1 1; -3 4] * ΨA[1; 2 3 -2] * conj(ΨB1[4; 2 5]) * conj(ΨB2[5; 3 -4])
     end
-    
+
     if pos % 2 == 0
-        ΨA = permute(psiA[ceil(Int, pos / 2)], (4, 2, 1), (3,) )
-        ΨB = permute(psiB[pos-1], (2,3), (1,))
-        tmp = permute(tmp, (3,),(4,1,2))
-        @plansor W[-1; -2 -3] := tmp[-1; 1 2 3] * conj(ΨB[-2 4; 1]) * ΨA[4 2 3; -3] 
+        ΨA = permute(psiA[ceil(Int, pos / 2)], (4, 2, 1), (3,))
+        ΨB = permute(psiB[pos-1], (2, 3), (1,))
+        tmp = permute(tmp, (3,), (4, 1, 2))
+        @plansor W[-1; -2 -3] := tmp[-1; 1 2 3] * conj(ΨB[-2 4; 1]) * ΨA[4 2 3; -3]
         W = permute(W, (2,), (1, 3))
     else
-        ΨA = permute(psiA[ceil(Int, pos / 2)], (3,2,1), (4,))
-        ΨB = permute(psiB[pos+1], (1,3), (2,))
-        tmp = permute(tmp, (4,), (3,1,2))
+        ΨA = permute(psiA[ceil(Int, pos / 2)], (3, 2, 1), (4,))
+        ΨB = permute(psiB[pos+1], (1, 3), (2,))
+        tmp = permute(tmp, (4,), (3, 1, 2))
         @plansor W[-1; -2 -3] := tmp[-1; 1 2 3] * ΨA[4 2 3; -3] * conj(ΨB[-2 4; 1])
     end
 
@@ -294,17 +294,17 @@ end
 # end
 
 function cost_func(pos, psiA, psiB)
-    C = const_C(psiA)
-    N = tN(pos, psiB)
-    ΨB = permute(psiB[pos], (1,), (3,2))
-    TNT = norm(@tensor N[1 2; 3 4] * ΨB[2; 5 1] * conj(psiB[pos][4; 3 5]))
-    W = tW(pos, psiA, psiB)
-    WdT = norm(@tensor W[1; 2 3] * conj(ΨB[1; 3 2]))
-    dWT = norm(@tensor conj(W[1; 2 3]) * ΨB[1; 3 2])
+    C = TRGKit.const_C(psiA)
+    N = TRGKit.tN(pos, psiB)
+    N = permute(N, (2, 1), (4, 3))
+    TNT = norm(@plansor N[2 1; 4 3] * psiB[pos][2; 1 5] * adjoint(psiB[pos])[3 5; 4])
+    W = TRGKit.tW(pos, psiA, psiB)
+    WdT = norm(@plansor W[1; 2 3] * adjoint(psiB[pos])[2 3; 1])
+    dWT = norm(@plansor adjoint(W)[1 2; 3] * psiB[pos][3; 1 2])
 
+    @show C, TNT, WdT, dWT
     return C + TNT - WdT - dWT
 end
-
 #optimization
 
 
@@ -331,7 +331,7 @@ function opt_T(N, W, psi)
     function apply_f(x::TensorMap)
         x = permute(x, (1,), (3, 2))
         @plansor b[-1; -2 -3] := N[1 2; -1 -2] * x[2; -3 1]
-        b = permute(b, (2,), (1,3))
+        b = permute(b, (2,), (1, 3))
         return b
     end
 
@@ -361,10 +361,27 @@ function loop_opt!(scheme::Loop_TNR, maxsteps_opt::Int, minerror_opt::Float64, d
         cost = cost_func(1, psi_A, psi_B)
         @show cost
     end
-    @tensor scheme.TA[-1 -2; -3 -4] := psi_B[5][4; -1 1] * psi_B[8][-2; 2 1] *
-                                       psi_B[1][2; -3 3] * psi_B[4][-4; 4 3]
-    @tensor scheme.TB[-1 -2; -3 -4] := psi_B[2][-1; 1 4] * psi_B[3][1; -2 2] *
-                                       psi_B[6][-3; 3 2] * psi_B[7][3; -4 4]
+    Ψ5 = permute(psi_B[5], (2,), (1, 3))
+    Ψ8 = permute(psi_B[8], (1,), (3, 2))
+    Ψ1 = permute(psi_B[1], (1, 2), (3,))
+    Ψ4 = permute(psi_B[4], (1,), (3, 2))
+
+    @plansor T1[-1 -2; -3 -4] := Ψ5[-1; 4 1] * Ψ8[-2; 1 2] * Ψ1[2 -4; 3] * Ψ4[-3; 3 4]
+    scheme.TA = permute(T1, (1, 2), (4, 3))
+
+    Ψ2 = permute(psi_B[2], (1,), (3, 2))
+    Ψ3 = permute(psi_B[3], (2,), (1, 3))
+    Ψ6 = permute(psi_B[6], (1,), (3, 2))
+    Ψ7 = permute(psi_B[7], (1,), (3, 2))
+
+    @plansor T2[-1 -2; -3 -4] := Ψ2[-1; 4 1] * Ψ3[-2; 1 2] * Ψ6[-4; 2 3] * Ψ7[3; 4 -3]
+    scheme.TB = permute(T2, (1, 2), (4, 3))
+
+
+    # @tensor scheme.TA[-1 -2; -3 -4] := psi_B[5][4; -1 1] * psi_B[8][-2; 2 1] *
+    #                                    psi_B[1][2; -3 3] * psi_B[4][-4; 4 3]
+    # @tensor scheme.TB[-1 -2; -3 -4] := psi_B[2][-1; 1 4] * psi_B[3][1; -2 2] *
+    #                                    psi_B[6][-3; 3 2] * psi_B[7][3; -4 4]
     return scheme
 end
 
