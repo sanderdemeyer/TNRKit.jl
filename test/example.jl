@@ -43,7 +43,7 @@ end
 @show lnz_robust
 
 
-scheme = Loop_TNR(gross_neveu_start(0,0,0), gross_neveu_start(0,0,0))
+scheme = Loop_TNR(classical_Potts(3, 1.0), classical_Potts(3, 1.0))
 data_tnr = []
 @info "Finalizing beginning"
 push!(data_tnr, scheme.finalize!(scheme))
@@ -74,6 +74,6 @@ for (i,d) in blocks(D)
 end
 diag = sort!(real(diag))
 using JLD2
-file = jldopen("tnr_ising.jld2", "w")
+file = jldopen("tnr_potts_q=3.jld2", "w")
 file["tnr_scheme"] = scheme
 close(file)

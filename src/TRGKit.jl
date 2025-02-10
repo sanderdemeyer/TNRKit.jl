@@ -21,7 +21,7 @@ module TRGKit
 
     # models
     include("models/ising.jl")
-    export classical_ising, classical_ising_symmetric
+    export classical_ising, classical_ising_symmetric, classical_Potts
 
     include("models/gross-neveu.jl")
     export gross_neveu_start
