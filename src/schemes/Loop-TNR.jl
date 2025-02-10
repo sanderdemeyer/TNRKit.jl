@@ -244,6 +244,36 @@ function tN(pos, psiB)
     return tmp
 end
 
+function TNT(pos, psiB)
+    
+    @plansor tmp[-1 -2; -3 -4] := psiB[mod(pos, 8)+1][-2; -1 1] * adjoint(psiB[mod(pos, 8)+1])[-3 1; -4]
+    tmp = permute(tmp, (2, 1), (4, 3))
+    for i = pos+1:pos+7
+        ΨB = permute(psiB[mod(i, 8)+1], (1,), (3, 2))
+        ΨBdag = permute(adjoint(psiB[mod(i, 8)+1]), (1, 3), (2,))
+        @plansor tmp[-1 -2; -3 -4] := tmp[-1 1; -3 2] * ΨB[1; 3 -2] * ΨBdag[-4 2; 3]
+    end
+    return @plansor tmp[1 1; 2 2]
+end
+
+function WdT(pos, psiA, psiB)
+    
+    next_a = mod(ceil(Int, pos / 2), 4) + 1
+    next_b = mod(2 * ceil(Int, pos / 2) + 1, 8)
+
+    @plansor tmp[-2 -1; -4 -3] := psiA[next_a][-1; -2 1 2] * adjoint(psiB[next_b])[3 2; -3] * adjoint(psiB[next_b+1])[-4 1; 3]
+    tmp = permute(tmp, (2, 1), (4, 3))
+    for i = next_a:next_a+2
+        ΨA = permute(psiA[mod(i, 4)+1], (1,), (4, 3, 2))
+        ΨB1 = permute(psiB[2*(mod(i, 4)+1)-1], (1,), (3, 2))
+        ΨB2 = permute(psiB[2*(mod(i, 4)+1)], (1,), (3, 2))
+        @plansor tmp[-1 -2; -3 -4] := tmp[-1 1; -3 4] * ΨA[1; 2 3 -2] * conj(ΨB1[4; 2 5]) * conj(ΨB2[5; 3 -4])
+    end
+
+    return @plansor tmp[1 1; 2 2]
+end
+
+
 function tW(pos, psiA, psiB)
     next_a = mod(ceil(Int, pos / 2), 4) + 1
     next_b = mod(2 * ceil(Int, pos / 2) + 1, 8)
@@ -295,15 +325,18 @@ end
 
 function cost_func(pos, psiA, psiB)
     C = TRGKit.const_C(psiA)
-    N = TRGKit.tN(pos, psiB)
-    N = permute(N, (2, 1), (4, 3))
-    TNT = norm(@plansor N[2 1; 4 3] * psiB[pos][2; 1 5] * adjoint(psiB[pos])[3 5; 4])
-    W = TRGKit.tW(pos, psiA, psiB)
-    WdT = norm(@plansor W[1; 2 3] * adjoint(psiB[pos])[2 3; 1])
-    dWT = norm(@plansor adjoint(W)[1 2; 3] * psiB[pos][3; 1 2])
+    # N = TRGKit.tN(pos, psiB)
+    # N = permute(N, (2, 1), (4, 3))
+    # TNT = norm(@plansor N[2 1; 4 3] * psiB[pos][2; 1 5] * adjoint(psiB[pos])[3 5; 4])
+    # W = TRGKit.tW(pos, psiA, psiB)
+    # WdT = norm(@plansor W[1; 2 3] * adjoint(psiB[pos])[2 3; 1])
+    # dWT = norm(@plansor adjoint(W)[1 2; 3] * psiB[pos][3; 1 2])
 
-    @show C, TNT, WdT, dWT
-    return C + TNT - WdT - dWT
+    # @show C, TNT, WdT, dWT
+    tNt = TNT(pos, psiB)
+    wdt = WdT(pos, psiA, psiB)
+    @show C, tNt, wdt
+    return C + tNt - 2*wdt 
 end
 #optimization
 
