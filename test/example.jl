@@ -43,7 +43,7 @@ end
 @show lnz_robust
 
 
-scheme = Loop_TNR(gross_neveu_start(0,0,0), gross_neveu_start(0,0,0)) 
+scheme = Loop_TNR(classical_ising(Ising_βc), classical_ising(Ising_βc)) 
 data_tnr = []
 @info "Finalizing beginning"
 push!(data_tnr, scheme.finalize!(scheme))
@@ -54,7 +54,7 @@ steps = 0
 crit = true
 while crit
     @info "Step $(steps + 1), data_tnr[end]: $(!isempty(data_tnr) ? data_tnr[end] : "empty")"
-    step!(scheme, 16, 100, 1e-20, 50, 1e-5)
+    step!(scheme, 16, 100, 1e-20, 50, 1e-12)
     push!(data_tnr, scheme.finalize!(scheme))
     steps += 1
     crit = stopping_criterion_tnr(steps, data_tnr)
@@ -73,7 +73,10 @@ for (i,d) in blocks(D)
     push!(diag, d...)
 end
 diag = sort!(real(diag))
+
+
+
 using JLD2
-file = jldopen("tnr_potts_q=3.jld2", "w")
+file = jldopen("tnr_ising.jld2", "w")
 file["tnr_scheme"] = scheme
 close(file)

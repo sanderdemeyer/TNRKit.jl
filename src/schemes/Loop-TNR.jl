@@ -128,9 +128,9 @@ function find_R(pos::Int, psi::Array, maxsteps::Int, minerror::Float64)
 end
 
 
-function P_decomp(R::TensorMap, L::TensorMap)
+function P_decomp(R::TensorMap, L::TensorMap, d_cut::Int)
     @plansor temp[-1; -2] := L[-1; 1] * R[1; -2]
-    U, S, V, _ = tsvd(temp, (1,), (2,))
+    U, S, V, _ = tsvd(temp, (1,), (2,), trunc = truncdim(d_cut))
     re_sq = pseudopow(S, -0.5)
 
     @plansor PR[-1; -2] := R[-1; 1] * adjoint(V)[1; 2] * re_sq[2; -2]
@@ -139,7 +139,7 @@ function P_decomp(R::TensorMap, L::TensorMap)
     return PR, PL
 end
 
-function find_projectors(psi::Array, maxsteps::Int, minerror::Float64)
+function find_projectors(psi::Array, maxsteps::Int, minerror::Float64, d_cut::Int)
     PR_list = []
     PL_list = []
     n = length(psi)
@@ -149,7 +149,7 @@ function find_projectors(psi::Array, maxsteps::Int, minerror::Float64)
 
         R = find_R(i, psi, maxsteps, minerror)
 
-        pr, pl = P_decomp(R, L)
+        pr, pl = P_decomp(R, L, d_cut)
 
         push!(PR_list, pr)
         push!(PL_list, pl)
@@ -159,9 +159,9 @@ end
 
 
 
-function entanglement_filtering!(scheme::Loop_TNR, maxsteps::Int, minerror::Float64)
+function entanglement_filtering!(scheme::Loop_TNR, maxsteps::Int, minerror::Float64, d_cut::Int)
     psi = psiA_new(scheme)
-    PR_list, PL_list = find_projectors(psi, maxsteps, minerror)
+    PR_list, PL_list = find_projectors(psi, maxsteps, minerror, d_cut)
 
 
     TA = copy(scheme.TA)
@@ -177,7 +177,7 @@ end
 
 #Constructing initial PsiB
 
-function one_loop_projector(phi::Array, pos::Int)
+function one_loop_projector(phi::Array, pos::Int, d_cut::Int)
     L = id(space(phi[1])[1])
     R = id(space(phi[end])[2]')
     for i = 1:pos
@@ -186,7 +186,7 @@ function one_loop_projector(phi::Array, pos::Int)
     for i = length(phi):-1:pos+1
         R = QR_R(R, phi[i])
     end
-    PR, PL = P_decomp(R, L)
+    PR, PL = P_decomp(R, L, d_cut)
     return PR, PL
 end
 
@@ -198,39 +198,58 @@ function SVD12(T::AbstractTensorMap{S,1,3}, d_cut::Int) where {S}
 end
 
 
+# function psiB(scheme::Loop_TNR, d_cut::Int)
+#     psiA = psiA_new(scheme)
+
+#     psiB_new = []
+
+#     for i = 1:4
+#         s1, s2 = SVD12(psiA[i], d_cut)
+#         phi = deepcopy(psiA)
+#         popat!(phi, i)
+#         insert!(phi, i, s1)
+#         insert!(phi, i + 1, s2)
+
+#         pr, pl = one_loop_projector(phi, i, d_cut)
+
+#         @plansor B1[-1; -2 -3] := s1[-1; 1 -3] * pr[1; -2]
+#         @plansor B2[-1; -2 -3] := pl[-1; 1] * s2[1; -2 -3]
+#         push!(psiB_new, B1)
+#         push!(psiB_new, B2)
+#     end
+#     return psiB_new
+# end
+
+
 function psiB(scheme::Loop_TNR, d_cut::Int)
     psiA = psiA_new(scheme)
-
-    psiB_new = []
+    psiB = []
 
     for i = 1:4
         s1, s2 = SVD12(psiA[i], d_cut)
-        phi = deepcopy(psiA)
-        popat!(phi, i)
-        insert!(phi, i, s1)
-        insert!(phi, i + 1, s2)
+        push!(psiB, s1)
+        push!(psiB, s2)
+    end
 
-        pr, pl = one_loop_projector(phi, i)
+    PR_list, PL_list = find_projectors(psiB, 100, 1e-12, d_cut)
 
-        @plansor B1[-1; -2 -3] := s1[-1; 1 -3] * pr[1; -2]
-        @plansor B2[-1; -2 -3] := pl[-1; 1] * s2[1; -2 -3]
+    psiB_new = []
+    for i = 1:8
+        @plansor B1[-1; -2 -3] := PL_list[i][-1; 1]* psiB[i][1; 2 -3] * PR_list[mod(i,8) + 1][2; -2]
         push!(psiB_new, B1)
-        push!(psiB_new, B2)
     end
     return psiB_new
 end
-
-
 
 #cost functions
 
 
 function const_C(psiA)
-    @plansor tmp[-1 -2; -3 -4] := psiA[1][-1; -3 1 2] * adjoint(psiA[1])[-4 1 2; -2]
+    @tensor tmp[-1 -2; -3 -4] := psiA[1][-1; -3 1 2] * adjoint(psiA[1])[-4 1 2; -2]
     for i = 2:4
-        @plansor tmp[-1 -2; -3 -4] := tmp[-1 -2; 1 2] * psiA[i][1; -3 3 4] * adjoint(psiA[i])[-4 3 4; 2]
+        @tensor tmp[-1 -2; -3 -4] := tmp[-1 -2; 1 2] * psiA[i][1; -3 3 4] * adjoint(psiA[i])[-4 3 4; 2]
     end
-    return @plansor tmp[1 2; 1 2]
+    return @tensor tmp[1 2; 1 2]
 end
 
 function tN(pos, psiB)
@@ -246,14 +265,14 @@ end
 
 function TNT(pos, psiB)
     
-    @plansor tmp[-1 -2; -3 -4] := psiB[mod(pos, 8)+1][-2; -1 1] * adjoint(psiB[mod(pos, 8)+1])[-3 1; -4]
+    @tensor tmp[-1 -2; -3 -4] := psiB[mod(pos, 8)+1][-2; -1 1] * adjoint(psiB[mod(pos, 8)+1])[-3 1; -4]
     tmp = permute(tmp, (2, 1), (4, 3))
     for i = pos+1:pos+7
         ΨB = permute(psiB[mod(i, 8)+1], (1,), (3, 2))
         ΨBdag = permute(adjoint(psiB[mod(i, 8)+1]), (1, 3), (2,))
-        @plansor tmp[-1 -2; -3 -4] := tmp[-1 1; -3 2] * ΨB[1; 3 -2] * ΨBdag[-4 2; 3]
+        @tensor tmp[-1 -2; -3 -4] := tmp[-1 1; -3 2] * ΨB[1; 3 -2] * ΨBdag[-4 2; 3]
     end
-    return @plansor tmp[1 1; 2 2]
+    return @tensor tmp[1 1; 2 2]
 end
 
 function WdT(pos, psiA, psiB)
@@ -261,32 +280,32 @@ function WdT(pos, psiA, psiB)
     next_a = mod(ceil(Int, pos / 2), 4) + 1
     next_b = mod(2 * ceil(Int, pos / 2) + 1, 8)
 
-    @plansor tmp[-2 -1; -4 -3] := psiA[next_a][-1; -2 1 2] * adjoint(psiB[next_b])[3 2; -3] * adjoint(psiB[next_b+1])[-4 1; 3]
+    @tensor tmp[-2 -1; -4 -3] := psiA[next_a][-1; -2 1 2] * adjoint(psiB[next_b])[3 2; -3] * adjoint(psiB[next_b+1])[-4 1; 3]
     tmp = permute(tmp, (2, 1), (4, 3))
     for i = next_a:next_a+2
         ΨA = permute(psiA[mod(i, 4)+1], (1,), (4, 3, 2))
         ΨB1 = permute(psiB[2*(mod(i, 4)+1)-1], (1,), (3, 2))
         ΨB2 = permute(psiB[2*(mod(i, 4)+1)], (1,), (3, 2))
-        @plansor tmp[-1 -2; -3 -4] := tmp[-1 1; -3 4] * ΨA[1; 2 3 -2] * conj(ΨB1[4; 2 5]) * conj(ΨB2[5; 3 -4])
+        @tensor tmp[-1 -2; -3 -4] := tmp[-1 1; -3 4] * ΨA[1; 2 3 -2] * conj(ΨB1[4; 2 5]) * conj(ΨB2[5; 3 -4])
     end
 
-    return @plansor tmp[1 1; 2 2]
+    return @tensor tmp[1 1; 2 2]
 end
 
 function dWT(pos, psiA, psiB)
     next_a = mod(ceil(Int, pos / 2), 4) + 1
     next_b = mod(2 * ceil(Int, pos / 2) + 1, 8)
 
-    @plansor tmp[-2 -1; -4 -3] := psiB[next_b][-1; 1 2] * psiB[next_b+1][1; -2 3] * adjoint(psiA[next_a])[-4 3 2;-3]
+    @tensor tmp[-2 -1; -4 -3] := psiB[next_b][-1; 1 2] * psiB[next_b+1][1; -2 3] * adjoint(psiA[next_a])[-4 3 2;-3]
     tmp = permute(tmp, (2, 1), (4, 3))
     for i = next_a:next_a+2
         ΨA = permute(psiA[mod(i, 4)+1], (1,), (4, 3, 2))
         ΨB1 = permute(psiB[2*(mod(i, 4)+1)-1], (1,), (3, 2))
         ΨB2 = permute(psiB[2*(mod(i, 4)+1)], (1,), (3, 2))
-        @plansor tmp[-1 -2; -3 -4] := tmp[-1 1; -3 4] * ΨB1[1;3 2] * ΨB2[2; 5 -2] * adjoint(ΨA)[3 5 -4;4]
+        @tensor tmp[-1 -2; -3 -4] := tmp[-1 1; -3 4] * ΨB1[1;3 2] * ΨB2[2; 5 -2] * adjoint(ΨA)[3 5 -4;4]
     end
 
-    return @plansor tmp[1 1; 2 2]
+    return @tensor tmp[1 1; 2 2]
 end
 
 function tW(pos, psiA, psiB)
@@ -436,7 +455,7 @@ end
 
 function step!(scheme::Loop_TNR, d_cut::Int, maxsteps::Int, minerror::Float64,
     maxsteps_opt::Int, minerror_opt::Float64)
-    entanglement_filtering!(scheme, maxsteps, minerror)
+    entanglement_filtering!(scheme, maxsteps, minerror, d_cut)
     #finalize!(scheme)
     loop_opt!(scheme, maxsteps_opt, minerror_opt, d_cut)
     return scheme
