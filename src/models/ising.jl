@@ -73,6 +73,7 @@ function Plaquette_Potts(q::Int64, β::Float64, J::Float64)
     end
 
     @tensor opt = true T[-1 -2 -3 -4; -5 -6 -7 -8] := A_potts[1 2; 3 4] * Triple_id[1; -1 -8] * Triple_id[2; -2 -3] * Triple_id[3; -4 -5] * Triple_id[4; -6 -7]
-
-    return T
+    U = isometry(fuse(V, V), V ⊗ V)
+    @tensor opt = true T_fused[-1 -2; -3 -4] := T[1 2 3 4; 5 6 7 8] * U[-1; 1 2] * U[-2; 3 4] * U[-3; 5 6] * U[-4; 7 8]
+    return T_fused
 end
