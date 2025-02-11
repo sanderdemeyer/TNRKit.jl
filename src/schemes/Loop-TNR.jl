@@ -273,6 +273,21 @@ function WdT(pos, psiA, psiB)
     return @plansor tmp[1 1; 2 2]
 end
 
+function dWT(pos, psiA, psiB)
+    next_a = mod(ceil(Int, pos / 2), 4) + 1
+    next_b = mod(2 * ceil(Int, pos / 2) + 1, 8)
+
+    @plansor tmp[-2 -1; -4 -3] := psiB[next_b][-1; 1 2] * psiB[next_b+1][1; -2 3] * adjoint(psiA[next_a])[-4 3 2;-3]
+    tmp = permute(tmp, (2, 1), (4, 3))
+    for i = next_a:next_a+2
+        ΨA = permute(psiA[mod(i, 4)+1], (1,), (4, 3, 2))
+        ΨB1 = permute(psiB[2*(mod(i, 4)+1)-1], (1,), (3, 2))
+        ΨB2 = permute(psiB[2*(mod(i, 4)+1)], (1,), (3, 2))
+        @plansor tmp[-1 -2; -3 -4] := tmp[-1 1; -3 4] * ΨB1[1;3 2] * ΨB2[2; 5 -2] * adjoint(ΨA)[3 5 -4;4]
+    end
+
+    return @plansor tmp[1 1; 2 2]
+end
 
 function tW(pos, psiA, psiB)
     next_a = mod(ceil(Int, pos / 2), 4) + 1
@@ -335,8 +350,9 @@ function cost_func(pos, psiA, psiB)
     # @show C, TNT, WdT, dWT
     tNt = TNT(pos, psiB)
     wdt = WdT(pos, psiA, psiB)
-    @show C, tNt, wdt
-    return C + tNt - 2*wdt 
+    dwt = dWT(pos, psiA, psiB)
+    @show C, tNt, wdt, dwt
+    return C + tNt - wdt - dwt
 end
 #optimization
 
