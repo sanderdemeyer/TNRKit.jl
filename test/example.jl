@@ -1,6 +1,8 @@
 using Revise, TensorKit
 includet("../src/TRGKit.jl")
 using .TRGKit
+using LinearAlgebra
+BLAS.set_num_threads(20)
 # criterion to determine convergence
 trg_f(steps::Int, data) = abs(log(data[end]) * 2.0^((1-steps)))
 # bound_trg_blk(steps::Int, data) = abs(log(data[end][1]) * 4.0^((1-steps)))
@@ -43,7 +45,7 @@ end
 @show lnz_robust
 
 
-scheme = Loop_TNR(classical_ising(Ising_βc), classical_ising(Ising_βc)) 
+scheme = Loop_TNR(gross_neveu_start(0,0,0), gross_neveu_start(0,0,0)) 
 data_tnr = []
 @info "Finalizing beginning"
 push!(data_tnr, scheme.finalize!(scheme))
@@ -54,7 +56,7 @@ steps = 0
 crit = true
 while crit
     @info "Step $(steps + 1), data_tnr[end]: $(!isempty(data_tnr) ? data_tnr[end] : "empty")"
-    step!(scheme, 16, 100, 1e-20, 50, 1e-12)
+    step!(scheme, 32, 100, 1e-20, 50, 1e-5)
     push!(data_tnr, scheme.finalize!(scheme))
     steps += 1
     crit = stopping_criterion_tnr(steps, data_tnr)
