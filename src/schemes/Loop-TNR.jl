@@ -39,25 +39,25 @@ function QR_R(R::TensorMap, T::AbstractTensorMap{S,2,2}) where {S}
 end
 
 function QR_L(L::TensorMap, T::AbstractTensorMap{S,1,3}) where {S}
-    @plansor temp[-1; -2 -3 -4] := L[-1; 1] * T[1; -2 -3 -4]
+    @tensor temp[-1; -2 -3 -4] := L[-1; 1] * T[1; -2 -3 -4]
     _, Rt = leftorth(temp, (1, 3, 4), (2,))
     return Rt
 end
 
 function QR_R(R::TensorMap, T::AbstractTensorMap{S,1,3}) where {S}
-    @plansor temp[-1; -2 -3 -4] := T[-1; 1 -3 -4] * R[1; -2]
+    @tensor temp[-1; -2 -3 -4] := T[-1; 1 -3 -4] * R[1; -2]
     Lt, _ = rightorth(temp, (1,), (2, 3, 4))
     return Lt
 end
 
 function QR_L(L::TensorMap, T::AbstractTensorMap{S,1,2}) where {S}
-    @plansor temp[-1; -2 -3] := L[-1; 1] * T[1; -2 -3]
+    @tensor temp[-1; -2 -3] := L[-1; 1] * T[1; -2 -3]
     _, Rt = leftorth(temp, (1, 3), (2,))
     return Rt
 end
 
 function QR_R(R::TensorMap, T::AbstractTensorMap{S,1,2}) where {S}
-    @plansor temp[-1; -2 -3] := T[-1; 1 -3] * R[1; -2]
+    @tensor temp[-1; -2 -3] := T[-1; 1 -3] * R[1; -2]
     Lt, _ = rightorth(temp, (1,), (2, 3))
     return Lt
 end
@@ -129,12 +129,12 @@ end
 
 
 function P_decomp(R::TensorMap, L::TensorMap, d_cut::Int)
-    @plansor temp[-1; -2] := L[-1; 1] * R[1; -2]
+    @tensor temp[-1; -2] := L[-1; 1] * R[1; -2]
     U, S, V, _ = tsvd(temp, (1,), (2,), trunc = truncdim(d_cut))
     re_sq = pseudopow(S, -0.5)
 
-    @plansor PR[-1; -2] := R[-1; 1] * adjoint(V)[1; 2] * re_sq[2; -2]
-    @plansor PL[-1; -2] := re_sq[-1; 1] * adjoint(U)[1; 2] * L[2; -2]
+    @tensor PR[-1; -2] := R[-1; 1] * adjoint(V)[1; 2] * re_sq[2; -2]
+    @tensor PL[-1; -2] := re_sq[-1; 1] * adjoint(U)[1; 2] * L[2; -2]
 
     return PR, PL
 end
@@ -167,8 +167,8 @@ function entanglement_filtering!(scheme::Loop_TNR, maxsteps::Int, minerror::Floa
     TA = copy(scheme.TA)
     TB = copy(scheme.TB)
 
-    @plansor scheme.TA[-1 -2; -3 -4] := TA[1 2; 3 4] * PR_list[4][1; -1] * PL_list[1][-2; 2] * PR_list[2][3; -3] * PL_list[3][-4; 4]
-    @plansor scheme.TB[-1 -2; -3 -4] := TB[1 2; 3 4] * PL_list[2][-1; 1] * PR_list[3][2; -2] * PL_list[4][-3; 3] * PR_list[1][4; -4]
+    @tensor scheme.TA[-1 -2; -3 -4] := TA[1 2; 3 4] * PR_list[4][1; -1] * PL_list[1][-2; 2] * PR_list[2][3; -3] * PL_list[3][-4; 4]
+    @tensor scheme.TB[-1 -2; -3 -4] := TB[1 2; 3 4] * PL_list[2][-1; 1] * PR_list[3][2; -2] * PL_list[4][-3; 3] * PR_list[1][4; -4]
 
     return scheme
 end
@@ -192,8 +192,8 @@ end
 
 function SVD12(T::AbstractTensorMap{S,1,3}, d_cut::Int) where {S}
     U, s, V, _ = tsvd(T, (1, 4), (2, 3), trunc=truncdim(d_cut))
-    @plansor S1[-1; -2 -3] := U[-1 -3; 1] * sqrt(s)[1; -2]
-    @plansor S2[-1; -2 -3] := sqrt(s)[-1; 1] * V[1; -2 -3]
+    @tensor S1[-1; -2 -3] := U[-1 -3; 1] * sqrt(s)[1; -2]
+    @tensor S2[-1; -2 -3] := sqrt(s)[-1; 1] * V[1; -2 -3]
     return S1, S2
 end
 
@@ -235,7 +235,7 @@ function psiB(scheme::Loop_TNR, d_cut::Int)
 
     psiB_new = []
     for i = 1:8
-        @plansor B1[-1; -2 -3] := PL_list[i][-1; 1]* psiB[i][1; 2 -3] * PR_list[mod(i,8) + 1][2; -2]
+        @tensor B1[-1; -2 -3] := PL_list[i][-1; 1]* psiB[i][1; 2 -3] * PR_list[mod(i,8) + 1][2; -2]
         push!(psiB_new, B1)
     end
     return psiB_new
@@ -253,12 +253,12 @@ function const_C(psiA)
 end
 
 function tN(pos, psiB)
-    @plansor tmp[-1 -2; -3 -4] := psiB[mod(pos, 8)+1][-2; -1 1] * adjoint(psiB[mod(pos, 8)+1])[-3 1; -4]
+    @tensor tmp[-1 -2; -3 -4] := psiB[mod(pos, 8)+1][-2; -1 1] * adjoint(psiB[mod(pos, 8)+1])[-3 1; -4]
     tmp = permute(tmp, (2, 1), (4, 3))
     for i = pos+1:pos+6
         ΨB = permute(psiB[mod(i, 8)+1], (1,), (3, 2))
         ΨBdag = permute(adjoint(psiB[mod(i, 8)+1]), (1, 3), (2,))
-        @plansor tmp[-1 -2; -3 -4] := tmp[-1 1; -3 2] * ΨB[1; 3 -2] * ΨBdag[-4 2; 3]
+        @tensor tmp[-1 -2; -3 -4] := tmp[-1 1; -3 2] * ΨB[1; 3 -2] * ΨBdag[-4 2; 3]
     end
     return tmp
 end
@@ -312,26 +312,26 @@ function tW(pos, psiA, psiB)
     next_a = mod(ceil(Int, pos / 2), 4) + 1
     next_b = mod(2 * ceil(Int, pos / 2) + 1, 8)
 
-    @plansor tmp[-2 -1; -4 -3] := psiA[next_a][-1; -2 1 2] * adjoint(psiB[next_b])[3 2; -3] * adjoint(psiB[next_b+1])[-4 1; 3]
+    @tensor tmp[-2 -1; -4 -3] := psiA[next_a][-1; -2 1 2] * adjoint(psiB[next_b])[3 2; -3] * adjoint(psiB[next_b+1])[-4 1; 3]
     tmp = permute(tmp, (2, 1), (4, 3))
     for i = next_a:next_a+1
         ΨA = permute(psiA[mod(i, 4)+1], (1,), (4, 3, 2))
         ΨB1 = permute(psiB[2*(mod(i, 4)+1)-1], (1,), (3, 2))
         ΨB2 = permute(psiB[2*(mod(i, 4)+1)], (1,), (3, 2))
-        @plansor tmp[-1 -2; -3 -4] := tmp[-1 1; -3 4] * ΨA[1; 2 3 -2] * conj(ΨB1[4; 2 5]) * conj(ΨB2[5; 3 -4])
+        @tensor tmp[-1 -2; -3 -4] := tmp[-1 1; -3 4] * ΨA[1; 2 3 -2] * conj(ΨB1[4; 2 5]) * conj(ΨB2[5; 3 -4])
     end
 
     if pos % 2 == 0
         ΨA = permute(psiA[ceil(Int, pos / 2)], (4, 2, 1), (3,))
         ΨB = permute(psiB[pos-1], (2, 3), (1,))
         tmp = permute(tmp, (3,), (4, 1, 2))
-        @plansor W[-1; -2 -3] := tmp[-1; 1 2 3] * conj(ΨB[-2 4; 1]) * ΨA[4 2 3; -3]
+        @tensor W[-1; -2 -3] := tmp[-1; 1 2 3] * conj(ΨB[-2 4; 1]) * ΨA[4 2 3; -3]
         W = permute(W, (2,), (1, 3))
     else
         ΨA = permute(psiA[ceil(Int, pos / 2)], (3, 2, 1), (4,))
         ΨB = permute(psiB[pos+1], (1, 3), (2,))
         tmp = permute(tmp, (4,), (3, 1, 2))
-        @plansor W[-1; -2 -3] := tmp[-1; 1 2 3] * ΨA[4 2 3; -3] * conj(ΨB[-2 4; 1])
+        @tensor W[-1; -2 -3] := tmp[-1; 1 2 3] * ΨA[4 2 3; -3] * conj(ΨB[-2 4; 1])
     end
 
     return W
@@ -398,7 +398,7 @@ end
 function opt_T(N, W, psi)
     function apply_f(x::TensorMap)
         x = permute(x, (1,), (3, 2))
-        @plansor b[-1; -2 -3] := N[1 2; -1 -2] * x[2; -3 1]
+        @tensor b[-1; -2 -3] := N[1 2; -1 -2] * x[2; -3 1]
         b = permute(b, (2,), (1, 3))
         return b
     end
@@ -419,10 +419,7 @@ function loop_opt!(scheme::Loop_TNR, maxsteps_opt::Int, minerror_opt::Float64, d
             W = tW(i, psi_A, psi_B)
             new_T = opt_T(N, W, psi_B[i])
             psi_B[i] = new_T
-            # new_N = permute(N, (1, 3), (2, 4))
-            # new_inv_N = permute(pinv(new_N), (4, 2), (3, 1))
-            # W = permute(W, (1,), (3, 2))
-            # @plansor psi_B[i][-1; -2 -3] := new_inv_N[-1 1; -2 2] * W[2; -3 1]
+            
         end
         sweep += 1
         @show sweep
@@ -434,7 +431,7 @@ function loop_opt!(scheme::Loop_TNR, maxsteps_opt::Int, minerror_opt::Float64, d
     Ψ1 = permute(psi_B[1], (1, 2), (3,))
     Ψ4 = permute(psi_B[4], (1,), (3, 2))
 
-    @plansor T1[-1 -2; -3 -4] := Ψ5[-1; 4 1] * Ψ8[-2; 1 2] * Ψ1[2 -4; 3] * Ψ4[-3; 3 4]
+    @tensor T1[-1 -2; -3 -4] := Ψ5[-1; 4 1] * Ψ8[-2; 1 2] * Ψ1[2 -4; 3] * Ψ4[-3; 3 4]
     scheme.TA = permute(T1, (1, 2), (4, 3))
 
     Ψ2 = permute(psi_B[2], (1,), (3, 2))
@@ -442,7 +439,7 @@ function loop_opt!(scheme::Loop_TNR, maxsteps_opt::Int, minerror_opt::Float64, d
     Ψ6 = permute(psi_B[6], (1,), (3, 2))
     Ψ7 = permute(psi_B[7], (1,), (3, 2))
 
-    @plansor T2[-1 -2; -3 -4] := Ψ2[-1; 4 1] * Ψ3[-2; 1 2] * Ψ6[-4; 2 3] * Ψ7[3; 4 -3]
+    @tensor T2[-1 -2; -3 -4] := Ψ2[-1; 4 1] * Ψ3[-2; 1 2] * Ψ6[-4; 2 3] * Ψ7[3; 4 -3]
     scheme.TB = permute(T2, (1, 2), (4, 3))
 
 
@@ -456,7 +453,6 @@ end
 function step!(scheme::Loop_TNR, d_cut::Int, maxsteps::Int, minerror::Float64,
     maxsteps_opt::Int, minerror_opt::Float64)
     entanglement_filtering!(scheme, maxsteps, minerror, d_cut)
-    #finalize!(scheme)
     loop_opt!(scheme, maxsteps_opt, minerror_opt, d_cut)
     return scheme
 end
