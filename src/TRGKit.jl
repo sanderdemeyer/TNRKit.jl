@@ -18,10 +18,10 @@ module TRGKit
     
     export TRGScheme, TRG, BTRG, ATRG, ATRG_3D, HOTRG, HOTRG_robust, trg_convcrit, btrg_convcrit, Loop_TNR, Boundary_TRG, boundary_subroutine, bulk_subroutine
     export run!, step!, pseudopow, entanglement_filtering!, find_projectors, make_psi
-
+    export Ising_βc, Potts_βc
     # models
     include("models/ising.jl")
-    export classical_ising, classical_ising_symmetric, classical_Potts
+    export classical_ising, classical_ising_symmetric, classical_Potts, Plaquette_Potts
 
     include("models/gross-neveu.jl")
     export gross_neveu_start

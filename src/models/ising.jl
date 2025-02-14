@@ -55,25 +55,26 @@ function classical_Potts(q::Int64, β::Float64)
     return A_potts
 end
 
-function Plaquette_Potts(q::Int64, β::Float64, J::Float64)
-    V = ℝ^q
-    A_potts = TensorMap(zeros, V ⊗ V ← V ⊗ V)
-    Triple_id = TensorMap(zeros, V ← V ⊗ V)
+function Plaquette_Potts(q::Int64, β, J□;JΔ=0.0)
+    V = ℂ^q
+    data = ComplexF64[Int(i==j)*Int(j==k) for i=1:q, j=1:q, k=1:q]
+    δ3 = TensorMap(data, V ← V ⊗ V)
+    U = isometry(fuse(V, V), V ⊗ V)
+    A_potts = TensorMap(zeros,ComplexF64, V ⊗ V ← V ⊗ V)
 
     for i = 1:q
         for j = 1:q
             for k = 1:q
-                Triple_id[i, j, k] = Int(i == j == k)
                 for l = 1:q
-                    E = -(Int(i == j) + Int(j == k) + Int(k == l) + Int(l == i)) / 4 - J * Int(i == j == k == l)
+                    # 0.5 factor for double counting the weight on the bond
+                    E = -(Int(i == j) + Int(j == k) + Int(k == l) + Int(l == i))/2
+                    E -= J□ * Int(i == j == k == l)
+                    E -= JΔ * (Int(i==j==k)+Int(j==k==l)+Int(k==l==i)+Int(l==i==j))
                     A_potts[i, j, k, l] = exp(-β * E)
                 end
             end
         end
     end
-
-    @tensor opt = true T[-1 -2 -3 -4; -5 -6 -7 -8] := A_potts[1 2; 3 4] * Triple_id[1; -1 -8] * Triple_id[2; -2 -3] * Triple_id[3; -4 -5] * Triple_id[4; -6 -7]
-    U = isometry(fuse(V, V), V ⊗ V)
-    @tensor opt = true T_fused[-1 -2; -3 -4] := T[1 2 3 4; 5 6 7 8] * U[-1; 1 2] * U[-2; 3 4] * U[-3; 5 6] * U[-4; 7 8]
-    return T_fused
+    @tensor opt=true Afin[-1 -2;-3 -4] := A_potts[1 2;3 4]*δ3[5;1 11]*conj(δ3[2; 6 7])*conj(δ3[10;3 8])*δ3[4;9 12]*U[-1;5 6]*U[-2;7 8]*conj(U[-3;9 10])*conj(U[-4;11 12]);
+    return Afin
 end
