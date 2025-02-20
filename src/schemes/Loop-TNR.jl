@@ -403,7 +403,7 @@ function opt_T(N, W, psi)
         return b
     end
 
-    new_T, info = linsolve(apply_f, W, psi)
+    new_T, info = linsolve(apply_f, W, psi; krylovdim = 50, tol = 1e-12, maxiter = 150)
     return new_T
 end
 
