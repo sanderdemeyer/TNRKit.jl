@@ -8,7 +8,7 @@ mutable struct ATRG <: TNRScheme
 end
 
 function step!(scheme::ATRG, trunc::TensorKit.TruncationScheme)
-    U, S, V, _ = tsvd(scheme.T, ((1, 4), (2, 3)); trunc=trunc)
+    U, S, V, _ = tsvd(scheme.T, ((1, 4), (2, 3)))
 
     @tensor A[-1 -2; -3] := U[-1 -3; -2]
     @tensor B[-1; -2 -3] := S[-3; 1] * V[1; -1 -2]
@@ -17,7 +17,7 @@ function step!(scheme::ATRG, trunc::TensorKit.TruncationScheme)
 
     @tensor M[-1 -2; -3 -4] := B[1; -3 -4] * C[-1 -2; 1]
 
-    U1, S1, V1, _ = tsvd(M, ((1, 4), (2, 3)); trunc=trunc)
+    U1, S1, V1, _ = tsvd(M, ((1, 4), (2, 3)))
 
     @tensor X[-1 -2; -3] := U1[-1 -3; 1] * sqrt(S1)[1; -2]
     @tensor Y[-1; -2 -3] := sqrt(S1)[-3; 1] * V1[1; -1 -2]
