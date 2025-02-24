@@ -36,7 +36,7 @@ function step!(scheme::HOTRG, trunc::TensorKit.TruncationScheme)
     return scheme
 end
 
-function step!(scheme::HOTRG, trunc::TensorKit.TruncationScheme)
+function step!(scheme::HOTRG_impurity, trunc::TensorKit.TruncationScheme)
     @tensor MMdag[-1 -2; -3 -4] := scheme.T[-1 5; 2 1] * scheme.T[-2 3; 4 5] *
                                    adjoint(scheme.T)[4 6; -4 3] *
                                    adjoint(scheme.T)[2 1; -3 6]
