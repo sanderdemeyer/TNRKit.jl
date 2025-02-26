@@ -2,11 +2,11 @@ mutable struct GILTTNR <: TNRScheme
     T::TensorMap
 
     ε::Float64
-    giltcrit::stopcrit
+    stopgilt::stopcrit
     finalize!::Function
-    function GILTTNR(T::TensorMap; ε=5e-8, giltcrit=trivial_convcrit(1e-2) & maxiter(50),
+    function GILTTNR(T::TensorMap; ε=5e-8, stopgilt=giltcrit() & maxiter(50),
                      finalize=finalize!)
-        return new(copy(T), ε, giltcrit, finalize)
+        return new(copy(T), ε, stopgilt, finalize)
     end
 end
 
@@ -14,22 +14,27 @@ function step!(scheme::GILTTNR, trunc::TensorKit.TruncationScheme)
     # step 1: GILT
     giltscheme = GILT(scheme.T; ε=scheme.ε)
 
-    gilt_steps = 0
-    crit = true
-    ns = (0.0, 0.0, 0.0, 0.0)
+    gilt_steps = 1
+    inner_counter = 1
+    crit = false
+    done_legs = Dict(direction => false for direction in (:N, :E, :S, :W))
 
     @infov 3 "Starting GILT\n$(giltscheme)\n"
-    t = @elapsed while crit
-        _, ns = _step!(giltscheme, truncbelow(scheme.ε))
-
-        gilt_steps += 1
-
-        crit = scheme.giltcrit(gilt_steps, maximum(ns))
-        @infov 4 "GILT step $gilt_steps, norms: $ns"
+    t = @elapsed while !crit
+        for direction in (:S, :N, :E, :W)
+            done = apply_gilt!(giltscheme, direction, trunc)
+            done_legs[direction] = done
+            @infov 4 "GILT step $gilt_steps.$inner_counter, legs: N: $(done_legs[:N]), E: $(done_legs[:E]), S: $(done_legs[:S]), W: $(done_legs[:W])"
+            inner_counter += 1
+        end
+        inner_counter = 1
+        gilt_steps += 1 # a gilt step is a full sweep
+        crit = scheme.stopgilt(gilt_steps, done_legs)
     end
 
-    @infov 3 "GILT finished\n $(stopping_info(scheme.giltcrit, gilt_steps, ns))\n Elapsed time: $(t)s\n Iterations: $gilt_steps"
+    @infov 3 "GILT finished\n $(stopping_info(scheme.stopgilt, gilt_steps, done_legs))\n Elapsed time: $(t)s\n Iterations: $gilt_steps"
 
+    # step 2: TRG
     U, S, V, _ = tsvd(giltscheme.T1, ((1, 2), (3, 4)); trunc=trunc)
 
     @plansor begin
@@ -52,11 +57,18 @@ function step!(scheme::GILTTNR, trunc::TensorKit.TruncationScheme)
     return scheme
 end
 
-gilttnr_convcrit(steps::Int, data) = abs(log(data[end]) * 2.0^(-steps))
-
 function Base.show(io::IO, scheme::GILTTNR)
     println(io, "Gilt-TRN - GILT + TRG")
     println(io, "  * T: $(summary(scheme.T))")
     println(io, "  * ε: $(scheme.ε)")
     return nothing
+end
+
+# stopping criterion for GILT
+struct giltcrit <: stopcrit end
+
+(crit::giltcrit)(steps::Int, done_legs) = all(values(done_legs))
+
+function stopping_info(crit::giltcrit, steps::Int, data)
+    return "Gilt criterion reached: all legs converged"
 end
