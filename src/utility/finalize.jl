@@ -3,7 +3,7 @@ const turning_scheme = Union{HOTRG,ATRG}
 
 # 1x1 unitcell finalize
 function finalize!(scheme::simple_scheme)
-    n = norm(@tensor scheme.T[1 2; 1 2])
+    n = norm(@plansor scheme.T[1 2; 2 1])
     scheme.T /= n
     return n
 end
@@ -25,8 +25,8 @@ end
 
 # 2x2 unitcell finalize
 function finalize_two_by_two!(scheme::simple_scheme)
-    n = norm(@tensor scheme.T[2 5; 1 7] * scheme.T[1 6; 2 8] * scheme.T[3 8; 4 6] *
-                     scheme.T[4 7; 3 5])
+    n = norm(@tensor scheme.T[2 7; 8 1] * scheme.T[1 5; 6 2] * scheme.T[3 6; 5 4] *
+                     scheme.T[4 8; 7 3])
     scheme.T /= (n^(1 / 4))
     return n
 end
