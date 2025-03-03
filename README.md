@@ -53,11 +53,11 @@ to choose the verbosity level, simply use `run!(...; verbosity=n)`. The default 
 ## Leg-convention
 All the schemes assume that the input tensor lives in the space `V₁⊗V₂←V₃⊗V₄` and that the legs are ordered in the following way:
 ```
-     4
+     3
      |
      v
      |
-1-<--┼--<-3
+1-<--┼--<-4
      |
      v
      |
