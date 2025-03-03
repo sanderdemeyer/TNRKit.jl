@@ -9,11 +9,11 @@ function finalize!(scheme::simple_scheme)
 end
 
 function finalize!(scheme::turning_scheme)
-    n = norm(@tensor scheme.T[1 2; 1 2])
+    n = norm(@plansor scheme.T[1 2; 2 1])
     scheme.T /= n
 
     # turn the tensor by 90 degrees
-    scheme.T = permute(scheme.T, ((2, 3), (4, 1)))
+    scheme.T = permute(scheme.T, ((2, 4), (1, 3)))
     return n
 end
 
@@ -31,7 +31,7 @@ function finalize_two_by_two!(scheme::simple_scheme)
     return n
 end
 
-function finalize_two_by_two!(scheme::turning_scheme)
+function finalize_two_by_two!(scheme::turning_scheme) # TODO: update to new convention
     n = norm(@tensor scheme.T[2 5; 1 7] * scheme.T[1 6; 2 8] * scheme.T[3 8; 4 6] *
                      scheme.T[4 7; 3 5])
     scheme.T /= (n^(1 / 4))

@@ -8,9 +8,8 @@ mutable struct HOTRG <: TNRScheme
 end
 
 function step!(scheme::HOTRG, trunc::TensorKit.TruncationScheme)
-    @tensor MMdag[-1 -2; -3 -4] := scheme.T[-1 5; 2 1] * scheme.T[-2 3; 4 5] *
-                                   adjoint(scheme.T)[4 6; -4 3] *
-                                   adjoint(scheme.T)[2 1; -3 6]
+    @plansor MMdag[-1 -2; -3 -4] := scheme.T[-1 5; 1 2] * scheme.T[-2 3; 5 4] *
+                                    conj(scheme.T[-3 6; 1 2]) * conj(scheme.T[-4 3; 6 4])
 
     # Get unitaries
     U, _, _, εₗ = tsvd(MMdag; trunc=trunc)
@@ -21,8 +20,8 @@ function step!(scheme::HOTRG, trunc::TensorKit.TruncationScheme)
     end
 
     # adjoint(U) on the left, U on the right
-    @tensor scheme.T[-1 -2; -3 -4] := adjoint(U)[-1; 1 2] * scheme.T[1 5; 4 -4] *
-                                      scheme.T[2 -2; 3 5] * U[4 3; -3]
+    @plansor scheme.T[-1 -2; -3 -4] := scheme.T[1 5; -3 3] * conj(U[1 2; -1]) * U[3 4; -4] *
+                                       scheme.T[2 -2; 5 4]
     return scheme
 end
 
