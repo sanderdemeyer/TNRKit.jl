@@ -18,7 +18,7 @@ function finalize!(scheme::turning_scheme)
 end
 
 function finalize!(scheme::BTRG)
-    n = norm(@tensor scheme.T[1 2; 3 4] * scheme.S1[4; 2] * scheme.S2[3; 1])
+    n = norm(@tensor scheme.T[1 2; 4 3] * scheme.S1[4; 2] * scheme.S2[3; 1])
     scheme.T /= n
     return n
 end
@@ -41,7 +41,7 @@ function finalize_two_by_two!(scheme::turning_scheme)
     return n
 end
 
-function finalize_two_by_two!(scheme::BTRG)
+function finalize_two_by_two!(scheme::BTRG) # TODO: update to new convention
     n′ = @tensor begin
         scheme.T[3 7; 1 11] *
         scheme.S2[1; 2] *
