@@ -368,21 +368,21 @@ function loop_opt!(scheme::LoopTNR, loop_criterion::stopcrit,
         end
         crit = loop_criterion(sweep, cost)
     end
-    Ψ5 = permute(psi_B[5], ((2,), (1, 3)))
-    Ψ8 = permute(psi_B[8], ((1,), (3, 2)))
-    Ψ1 = permute(psi_B[1], ((1, 2), (3,)))
-    Ψ4 = permute(psi_B[4], ((1,), (3, 2)))
 
-    @tensor T1[-1 -2; -3 -4] := Ψ5[-1; 4 1] * Ψ8[-2; 1 2] * Ψ1[2 -4; 3] * Ψ4[-3; 3 4]
-    scheme.TA = permute(T1, ((1, 2), (4, 3)))
+    Ψ5 = psi_B[5]
+    Ψ8 = psi_B[8]
+    Ψ1 = psi_B[1]
+    Ψ4 = psi_B[4]
 
-    Ψ2 = permute(psi_B[2], ((1,), (3, 2)))
-    Ψ3 = permute(psi_B[3], ((2,), (1, 3)))
-    Ψ6 = permute(psi_B[6], ((1,), (3, 2)))
-    Ψ7 = permute(psi_B[7], ((1,), (3, 2)))
+    @tensor scheme.TA[-1 -2; -3 -4] := Ψ5[1; 2 -1] * Ψ8[-2; 2 3] * Ψ1[3; 4 -4] * Ψ4[-3; 4 1]
 
-    @tensor T2[-1 -2; -3 -4] := Ψ2[-1; 4 1] * Ψ3[-2; 1 2] * Ψ6[-4; 2 3] * Ψ7[3; 4 -3]
-    scheme.TB = permute(T2, ((1, 2), (4, 3)))
+    Ψ2 = psi_B[2]
+    Ψ3 = psi_B[3]
+    Ψ6 = psi_B[6]
+    Ψ7 = psi_B[7]
+
+    @tensor scheme.TB[-1 -2; -3 -4] := Ψ2[-1; 4 1] * Ψ3[1; 2 -2] * Ψ6[-4; 2 3] * Ψ7[3; 4 -3]
+
     return scheme
 end
 
