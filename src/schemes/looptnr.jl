@@ -200,6 +200,10 @@ function Ψ_B(scheme::LoopTNR, trunc::TensorKit.TruncationScheme)
 end
 
 #Entanglement Filtering 
+entanglement_function(steps, data) = abs(data[end])
+entanglement_criterion = maxiter(100) & convcrit(1e-15, entanglement_function)
+
+loop_criterion = maxiter(50) & convcrit(1e-10, entanglement_function)
 
 function entanglement_filtering!(scheme::LoopTNR, entanglement_criterion::stopcrit,
                                  trunc::TensorKit.TruncationScheme)
@@ -219,6 +223,9 @@ function entanglement_filtering!(scheme::LoopTNR, entanglement_criterion::stopcr
     return scheme
 end
 
+function entanglement_filtering!(scheme::LoopTNR, trunc::TensorKit.TruncationScheme)
+    return entanglement_filtering!(scheme, entanglement_criterion, trunc)
+end
 #cost functions
 
 function const_C(psiA)
@@ -390,6 +397,11 @@ function loop_opt!(scheme::LoopTNR, loop_criterion::stopcrit,
     return scheme
 end
 
+function loop_opt!(scheme::LoopTNR, trunc::TensorKit.TruncationScheme,
+                   verbosity::Int)
+    return loop_opt!(scheme, loop_criterion, trunc, verbosity)
+end
+
 function step!(scheme::LoopTNR, trunc::TensorKit.TruncationScheme,
                entanglement_criterion::stopcrit,
                loop_criterion::stopcrit, verbosity::Int)
@@ -444,11 +456,6 @@ function run!(scheme::LoopTNR, trscheme::TensorKit.TruncationScheme, criterion::
     end
     return data
 end
-
-entanglement_function(steps, data) = abs(data[end])
-entanglement_criterion = maxiter(100) & convcrit(1e-15, entanglement_function)
-
-loop_criterion = maxiter(50) & convcrit(1e-10, entanglement_function)
 
 function run!(scheme::LoopTNR, trscheme::TensorKit.TruncationScheme, criterion::stopcrit;
               finalize_beginning=true, verbosity=1)
