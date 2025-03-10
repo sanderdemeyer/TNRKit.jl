@@ -8,7 +8,7 @@ function finalize!(scheme::simple_scheme)
     return n
 end
 
-function finalize!(scheme::HOTRG_impurity)
+function finalize!(scheme::HOTRG_single_impurity)
     n_T = norm(@tensor scheme.T[1 2; 1 2])
     n_S = norm(@tensor scheme.S[1 2; 1 2])
     scheme.T /= n_T

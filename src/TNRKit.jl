@@ -21,7 +21,7 @@ include("schemes/slooptnr.jl")
 export TNRScheme
 export TRG, trg_convcrit
 export BTRG, btrg_convcrit
-export HOTRG, hotrg_convcrit
+export HOTRG, hotrg_convcrit, HOTRG_single_impurity
 export ATRG, atrg_convcrit
 export GILTTNR, gilttnr_convcrit
 export SLoopTNR
