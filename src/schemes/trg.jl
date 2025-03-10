@@ -7,22 +7,37 @@ mutable struct TRG <: TNRScheme
     end
 end
 
+# function step!(scheme::TRG, trunc::TensorKit.TruncationScheme)
+#     U, S, V, _ = tsvd(scheme.T, ((1, 2), (3, 4)); trunc=trunc)
+
+#     @plansor begin
+#         A[-1 -2; -3] := U[-1 -2; 1] * sqrt(S)[1; -3]
+#         B[-1; -2 -3] := sqrt(S)[-1; 1] * V[1; -2 -3]
+#     end
+
+#     U, S, V, _ = tsvd(scheme.T, ((3, 1), (4, 2)); trunc=trunc)
+
+#     @plansor begin
+#         C[-1 -2; -3] := U[-1 -2; 1] * sqrt(S)[1; -3]
+#         D[-1; -2 -3] := sqrt(S)[-1; 1] * V[1; -2 -3]
+#     end
+
+#     @plansor scheme.T[-1 -2; -3 -4] := D[-1; 3 1] * B[-2; 1 4] * C[2 4; -4] * A[3 2; -3]
+#     return scheme
+# end
+
 function step!(scheme::TRG, trunc::TensorKit.TruncationScheme)
     U, S, V, _ = tsvd(scheme.T, ((1, 2), (3, 4)); trunc=trunc)
 
-    @plansor begin
-        A[-1 -2; -3] := U[-1 -2; 1] * sqrt(S)[1; -3]
-        B[-1; -2 -3] := sqrt(S)[-1; 1] * V[1; -2 -3]
-    end
+    A = U * sqrt(S)
+    B = sqrt(S) * V
 
-    U, S, V, _ = tsvd(scheme.T, ((3, 1), (4, 2)); trunc=trunc)
+    U, S, V, _ = tsvd(scheme.T, ((2, 4), (3, 1)); trunc=trunc)
 
-    @plansor begin
-        C[-1 -2; -3] := U[-1 -2; 1] * sqrt(S)[1; -3]
-        D[-1; -2 -3] := sqrt(S)[-1; 1] * V[1; -2 -3]
-    end
+    C = U * sqrt(S)
+    D = sqrt(S) * V
 
-    @plansor scheme.T[-1 -2; -3 -4] := D[-1; 3 1] * B[-2; 1 4] * C[2 4; -4] * A[3 2; -3]
+    @tensor scheme.T[-1 -2; -3 -4] := A[1 4; -2] * C[3 1; -4] * B[-3; 3 2] * D[-1; 4 2]
     return scheme
 end
 
