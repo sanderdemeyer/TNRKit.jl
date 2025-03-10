@@ -7,7 +7,7 @@ mutable struct HOTRG <: TNRScheme
     end
 end
 
-mutable struct HOTRG_impurity <: TNRScheme
+mutable struct HOTRG_single_impurity <: TNRScheme
     T::TensorMap
     S::TensorMap
 
@@ -36,7 +36,7 @@ function step!(scheme::HOTRG, trunc::TensorKit.TruncationScheme)
     return scheme
 end
 
-function step!(scheme::HOTRG_impurity, trunc::TensorKit.TruncationScheme)
+function step!(scheme::HOTRG_single_impurity, trunc::TensorKit.TruncationScheme)
     @tensor MMdag[-1 -2; -3 -4] := scheme.T[-1 5; 2 1] * scheme.T[-2 3; 4 5] *
                                    adjoint(scheme.T)[4 6; -4 3] *
                                    adjoint(scheme.T)[2 1; -3 6]
@@ -70,7 +70,7 @@ function Base.show(io::IO, scheme::HOTRG)
     return nothing
 end
 
-function Base.show(io::IO, scheme::HOTRG_impurity)
+function Base.show(io::IO, scheme::HOTRG_single_impurity)
     println(io, "HOTRG - Higher Order TRG with impurity")
     println(io, "  * T: $(summary(scheme.T))")
     println(io, "  * S: $(summary(scheme.S))")
