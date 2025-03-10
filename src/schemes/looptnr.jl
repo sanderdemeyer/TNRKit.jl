@@ -98,7 +98,11 @@ end
 
 function find_R(pos::Int, psi::Array, entanglement_criterion::stopcrit)
     n = length(psi)
-    R = id(space(psi[mod(pos - 2, n) + 1])[4]')
+    if numin(psi[mod(pos - 2, n) + 1]) == 2
+        R = id(space(psi[mod(pos - 2, n) + 1])[3]')
+    else
+        R = id(space(psi[mod(pos - 2, n) + 1])[4]')
+    end
     crit = true
     steps = 0
     error = [Inf]
@@ -250,7 +254,7 @@ function WdT(pos, psiA, psiB)
         ΨB1 = psiB[2 * (mod(i, 4) + 1) - 1]
         ΨB2 = psiB[2 * (mod(i, 4) + 1)]
         @tensor tmp[-1 -2; -3 -4] := tmp[-1 -2; 1 2] * ΨA[2; 3 4 -4] * conj(ΨB1[1; 3 5]) *
-                                     conj(ΨB2[5; 4 -2])
+                                     conj(ΨB2[5; 4 -3])
     end
 
     return @tensor tmp[1 2; 1 2]
