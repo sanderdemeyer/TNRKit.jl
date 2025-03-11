@@ -293,7 +293,7 @@ function cost_func(pos, psiA, psiB)
     wdt = WdT(pos, psiA, psiB)
     dwt = dWT(pos, psiA, psiB)
 
-    return abs(C + tNt - wdt - dwt)
+    return C + tNt - wdt - dwt
 end
 
 #Optimisation functions
@@ -402,11 +402,14 @@ function loop_opt!(scheme::LoopTNR, trunc::TensorKit.TruncationScheme,
     return loop_opt!(scheme, loop_criterion, trunc, verbosity)
 end
 
+function my_inner(x, v1, v2)
+    return real(dot(v1, v2))
+end
+
 function loop_opt_var!(scheme::LoopTNR, trunc::TensorKit.TruncationScheme)
     psi_A = Ψ_A(scheme)
 
-    f(A) = cost_func(1, psi_A, A) # Another convention was used when implementing SLoopTNR
-
+    f(A) = cost_func(1, psi_A, A) 
     function fg(f, A)
         f, g = Zygote.withgradient(f, A)
         return f, g[1]
@@ -417,7 +420,7 @@ function loop_opt_var!(scheme::LoopTNR, trunc::TensorKit.TruncationScheme)
     psi_B_0 = Ψ_B(scheme, trunc)
 
     B_opt, _, _, _, _ = optimize(A -> fg(f, A), psi_B_0,
-                                 LBFGS(8; verbosity=3, maxiter=500, gradtol=1e-4))
+                                 LBFGS(8; verbosity=3, maxiter=500, gradtol=1e-4), inner = my_inner)
 
     Ψ5 = B_opt[5]
     Ψ8 = B_opt[8]
