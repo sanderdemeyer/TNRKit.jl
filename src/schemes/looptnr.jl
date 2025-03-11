@@ -24,18 +24,6 @@ end
 
 #Utility functions for QR decomp
 
-# function QR_L(L::TensorMap, T::AbstractTensorMap{E,S,2,2}) where {E,S}
-#     @tensor temp[-1 -2; -3 -4] := L[-2; 1] * T[-1 1; -3 -4]
-#     _, Rt = leftorth(temp, ((1, 2, 4), (3,)))
-#     return Rt
-# end
-
-# function QR_R(R::TensorMap, T::AbstractTensorMap{E,S,2,2}) where {E,S}
-#     @tensor temp[-1 -2; -3 -4] := T[-1 -2; 1 -4] * R[1; -3]
-#     Lt, _ = rightorth(temp, ((2,), (1, 3, 4)))
-#     return Lt
-# end
-
 function QR_L(L::TensorMap, T::AbstractTensorMap{E,S,1,3}) where {E,S}
     @tensor temp[-1; -2 -3 -4] := L[-1; 1] * T[1; -2 -3 -4]
     _, Rt = leftorth(temp, ((1, 2, 3), (4,)))
@@ -254,9 +242,6 @@ function WdT(pos, psiA, psiB)
     @tensor tmp[-1 -2; -3 -4] := psiA[next_a][-2; 1 2 -4] * conj(psiB[next_b][-1; 1 3]) *
                                  conj(psiB[next_b + 1][3; 2 -3])
     for i in next_a:(next_a + 2)
-        # ΨA = permute(psiA[mod(i, 4) + 1], ((1,), (4, 3, 2)))
-        # ΨB1 = permute(psiB[2 * (mod(i, 4) + 1) - 1], ((1,), (3, 2)))
-        # ΨB2 = permute(psiB[2 * (mod(i, 4) + 1)], ((1,), (3, 2)))
         ΨA = psiA[mod(i, 4) + 1]
         ΨB1 = psiB[2 * (mod(i, 4) + 1) - 1]
         ΨB2 = psiB[2 * (mod(i, 4) + 1)]
@@ -274,9 +259,6 @@ function dWT(pos, psiA, psiB)
     @tensor tmp[-1 -2; -3 -4] := psiB[next_b][-2; 1 2] * psiB[next_b + 1][2; 3 -4] *
                                  conj(psiA[next_a][-1; 1 3 -3])
     for i in next_a:(next_a + 2)
-        # ΨA = permute(psiA[mod(i, 4) + 1], ((1,), (4, 3, 2)))
-        # ΨB1 = permute(psiB[2 * (mod(i, 4) + 1) - 1], ((1,), (3, 2)))
-        # ΨB2 = permute(psiB[2 * (mod(i, 4) + 1)], ((1,), (3, 2)))
         ΨA = psiA[mod(i, 4) + 1]
         ΨB1 = psiB[2 * (mod(i, 4) + 1) - 1]
         ΨB2 = psiB[2 * (mod(i, 4) + 1)]
@@ -302,8 +284,6 @@ function tN(pos, psiB)
     @tensor tmp[-1 -2; -3 -4] := psiB[mod(pos, 8) + 1][-2; 1 -4] *
                                  conj(psiB[mod(pos, 8) + 1][-1 1; -3])
     for i in (pos + 1):(pos + 6)
-        # ΨB = permute(psiB[mod(i, 8) + 1], ((1,), (3, 2)))
-        # ΨBdag = permute(adjoint(psiB[mod(i, 8) + 1]), ((1, 3), (2,)))
         ΨB = psiB[mod(i, 8) + 1]
         @tensor tmp[-1 -2; -3 -4] := tmp[-1 -2; 1 2] * ΨB[2; 3 -4] * conj(ΨB[1; 3 -3])
     end
@@ -317,9 +297,6 @@ function tW(pos, psiA, psiB)
     @tensor tmp[-1 -2; -3 -4] := psiA[next_a][-2; 1 2 -4] * conj(psiB[next_b][-1; 1 3]) *
                                  conj(psiB[next_b + 1][3; 2 -3])
     for i in next_a:(next_a + 1)
-        # ΨA = permute(psiA[mod(i, 4) + 1], ((1,), (4, 3, 2)))
-        # ΨB1 = permute(psiB[2 * (mod(i, 4) + 1) - 1], ((1,), (3, 2)))
-        # ΨB2 = permute(psiB[2 * (mod(i, 4) + 1)], ((1,), (3, 2)))
         ΨA = psiA[mod(i, 4) + 1]
         ΨB1 = psiB[2 * (mod(i, 4) + 1) - 1]
         ΨB2 = psiB[2 * (mod(i, 4) + 1)]
@@ -328,14 +305,10 @@ function tW(pos, psiA, psiB)
     end
 
     if pos % 2 == 0
-        # ΨA = permute(psiA[ceil(Int, pos / 2)], ((4, 2, 1), (3,)))
-        # ΨB = permute(psiB[pos - 1], ((2, 3), (1,)))
         ΨA = psiA[ceil(Int, pos / 2)]
         ΨB = psiB[pos - 1]
         @tensor W[-1; -2 -3] := tmp[-3 1; 2 3] * conj(ΨB[2 4; -1]) * ΨA[3; 4 -2 1]
     else
-        # ΨA = permute(psiA[ceil(Int, pos / 2)], ((3, 2, 1), (4,)))
-        # ΨB = permute(psiB[pos + 1], ((1, 3), (2,)))
         ΨA = psiA[ceil(Int, pos / 2)]
         ΨB = psiB[pos + 1]
         @tensor W[-1; -2 -3] := tmp[1 2; -1 3] * ΨA[3; -2 4 2] * conj(ΨB[-3; 4 1])
@@ -409,7 +382,7 @@ end
 function loop_opt_var!(scheme::LoopTNR, trunc::TensorKit.TruncationScheme)
     psi_A = Ψ_A(scheme)
 
-    f(A) = cost_func(1, psi_A, A) 
+    f(A) = cost_func(1, psi_A, A)
     function fg(f, A)
         f, g = Zygote.withgradient(f, A)
         return f, g[1]
@@ -420,7 +393,8 @@ function loop_opt_var!(scheme::LoopTNR, trunc::TensorKit.TruncationScheme)
     psi_B_0 = Ψ_B(scheme, trunc)
 
     B_opt, _, _, _, _ = optimize(A -> fg(f, A), psi_B_0,
-                                 LBFGS(8; verbosity=3, maxiter=500, gradtol=1e-4), inner = my_inner)
+                                 LBFGS(8; verbosity=3, maxiter=500, gradtol=1e-4);
+                                 inner=my_inner)
 
     Ψ5 = B_opt[5]
     Ψ8 = B_opt[8]
