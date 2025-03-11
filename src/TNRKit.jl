@@ -26,7 +26,7 @@ export HOTRG, hotrg_convcrit
 export ATRG, atrg_convcrit
 export GILTTNR, gilttnr_convcrit
 export SLoopTNR
-export LoopTNR, Ψ_A, Ψ_B, entanglement_filtering!, loop_opt!
+export LoopTNR, Ψ_A, Ψ_B, entanglement_filtering!, loop_opt!, loop_opt_var!
 export run!
 
 # models

@@ -293,7 +293,7 @@ function cost_func(pos, psiA, psiB)
     wdt = WdT(pos, psiA, psiB)
     dwt = dWT(pos, psiA, psiB)
 
-    return C + tNt - wdt - dwt
+    return abs(C + tNt - wdt - dwt)
 end
 
 #Optimisation functions
@@ -402,22 +402,56 @@ function loop_opt!(scheme::LoopTNR, trunc::TensorKit.TruncationScheme,
     return loop_opt!(scheme, loop_criterion, trunc, verbosity)
 end
 
+function loop_opt_var!(scheme::LoopTNR, trunc::TensorKit.TruncationScheme)
+    psi_A = Ψ_A(scheme)
+
+    f(A) = cost_func(1, psi_A, A) # Another convention was used when implementing SLoopTNR
+
+    function fg(f, A)
+        f, g = Zygote.withgradient(f, A)
+        return f, g[1]
+    end
+
+    Zygote.refresh()
+
+    psi_B_0 = Ψ_B(scheme, trunc)
+
+    B_opt, _, _, _, _ = optimize(A -> fg(f, A), psi_B_0,
+                                 LBFGS(8; verbosity=3, maxiter=500, gradtol=1e-4))
+
+    Ψ5 = B_opt[5]
+    Ψ8 = B_opt[8]
+    Ψ1 = B_opt[1]
+    Ψ4 = B_opt[4]
+
+    @tensor scheme.TA[-1 -2; -3 -4] := Ψ5[1; 2 -1] * Ψ8[-2; 2 3] * Ψ1[3; 4 -4] * Ψ4[-3; 4 1]
+
+    Ψ2 = B_opt[2]
+    Ψ3 = B_opt[3]
+    Ψ6 = B_opt[6]
+    Ψ7 = B_opt[7]
+
+    @tensor scheme.TB[-1 -2; -3 -4] := Ψ2[-1; 4 1] * Ψ3[1; 2 -2] * Ψ6[-4; 2 3] * Ψ7[3; 4 -3]
+
+    return scheme
+end
+
 function step!(scheme::LoopTNR, trunc::TensorKit.TruncationScheme,
                entanglement_criterion::stopcrit,
                loop_criterion::stopcrit, verbosity::Int)
     entanglement_filtering!(scheme, entanglement_criterion, trunc)
-    loop_opt!(scheme, loop_criterion, trunc, verbosity::Int)
+    #loop_opt!(scheme, loop_criterion, trunc, verbosity::Int)
+    loop_opt_var!(scheme, trunc)
     return scheme
 end
 
 #2x2 finalise function
 
 function finalize!(scheme::LoopTNR)
-    T1 = permute(scheme.TA, ((1,2), (4,3)))
-    T2 = permute(scheme.TB, ((1,2), (4,3)))
+    T1 = permute(scheme.TA, ((1, 2), (4, 3)))
+    T2 = permute(scheme.TB, ((1, 2), (4, 3)))
     n = norm(@plansor opt = true T1[1 2; 3 4] * T2[3 5; 1 6] *
                                  T2[7 4; 8 2] * T1[8 6; 7 5])
-
 
     scheme.TA /= n^(1 / 4)
     scheme.TB /= n^(1 / 4)
