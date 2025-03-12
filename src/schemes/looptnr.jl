@@ -1,4 +1,3 @@
-#TODO: Make this work for Fermions
 #TODO: Add documentation
 mutable struct LoopTNR <: TNRScheme
     # data
