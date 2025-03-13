@@ -417,8 +417,8 @@ function step!(scheme::LoopTNR, trunc::TensorKit.TruncationScheme,
                entanglement_criterion::stopcrit,
                loop_criterion::stopcrit, verbosity::Int)
     entanglement_filtering!(scheme, entanglement_criterion, trunc)
-    #loop_opt!(scheme, loop_criterion, trunc, verbosity::Int)
-    loop_opt_var!(scheme, trunc)
+    loop_opt!(scheme, loop_criterion, trunc, verbosity::Int)
+    #loop_opt_var!(scheme, trunc)
     return scheme
 end
 
