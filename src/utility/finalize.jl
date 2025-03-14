@@ -56,3 +56,20 @@ function finalize_two_by_two!(scheme::BTRG) # TODO: update to new convention
     scheme.T /= (n^(1 / 4))
     return n
 end
+
+function cft_finalize!(scheme::LoopTNR)
+    T1 = permute(scheme.TA, ((1, 2), (4, 3)))
+    T2 = permute(scheme.TB, ((1, 2), (4, 3)))
+    n = norm(@plansor opt = true T1[1 2; 3 4] * T2[3 5; 1 6] *
+                                 T2[7 4; 8 2] * T1[8 6; 7 5])
+
+    scheme.TA /= n^(1 / 4)
+    scheme.TB /= n^(1 / 4)
+    return cft_data(scheme; is_real=false)
+end
+
+function cft_finalize!(scheme::BTRG)
+    n = norm(@tensor scheme.T[1 2; 4 3] * scheme.S1[4; 2] * scheme.S2[3; 1])
+    scheme.T /= n
+    return cft_data(scheme; is_real=false)
+end

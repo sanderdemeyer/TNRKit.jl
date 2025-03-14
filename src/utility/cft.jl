@@ -60,7 +60,7 @@ function cft_data(scheme::BTRG; v=1, unitcell=1, is_real=true)
     return unitcell * (1 / (2π * v)) * log.(data[1] ./ data)
 end
 
-function cft_data(scheme::LoopTNR, isreal=true)
+function cft_data(scheme::LoopTNR; is_real=true)
     @tensor opt = true T[-1 -2; -3 -4] := scheme.TA[-1 1; 3 2] * scheme.TB[2 6; 4 -3] *
                                           scheme.TB[-2 3; 1 5] * scheme.TA[5 4; 6 -4]
 
@@ -69,9 +69,10 @@ function cft_data(scheme::LoopTNR, isreal=true)
     for (i, d) in blocks(D)
         push!(diag, d...)
     end
+    diag = filter(x -> abs(x) > 1e-12, diag)
     data = sort!(diag; by=x -> abs(x), rev=true)
 
-    if isreal
+    if is_real
         data = real(data)
     end
     return (1 / (2π)) * log.(data[1] ./ data)
@@ -80,14 +81,14 @@ end
 function central_charge(scheme::TNRScheme, trunc::TensorKit.TruncationScheme,
                         stop::stopcrit)
     data = run!(scheme, trunc, stop; finalize_beginning=true)
-    @tensor M[-1; -2] := (scheme.T / data[end])[1 -1; 1 -2]
+    @tensor M[-1; -2] := (scheme.T / data[end])[1 -1; -2 1]
     _, S, _ = tsvd(M)
     return log(S[1, 1]) * 6 / (π)
 end
 
 function central_charge(scheme::BTRG, trunc::TensorKit.TruncationScheme, stop::stopcrit)
     data = run!(scheme, trunc, stop; finalize_beginning=true)
-    @tensor M[-1; -2] := (scheme.T / data[end])[1 2; 3 -2] * scheme.S1[-1; 2] *
+    @tensor M[-1; -2] := (scheme.T / data[end])[1 2; -2 3] * scheme.S1[-1; 2] *
                          scheme.S2[3; 1]
     _, S, _ = tsvd(M)
     return log(S[1, 1]) * 6 / (π)
