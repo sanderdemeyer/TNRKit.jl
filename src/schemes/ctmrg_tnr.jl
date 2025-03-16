@@ -1,10 +1,11 @@
 mutable struct CTMTNR <: TNRScheme
     T::InfinitePartitionFunction
     E::CTMRGEnv
-    ctmalg::PEPSKit.CTMRGAlgorithm
     finalize!::Function
-    function CTMTNR(T::TensorMap, E::CTMRGEnv; finalize=finalize!, ctmalg=PEPSKit.SimultaneousCTMRG(maxiter = 20, tol = 1e-8))
-        return new(T, E, finalize)
+    ctmalg::PEPSKit.CTMRGAlgorithm
+    function CTMTNR(T::InfinitePartitionFunction, E::CTMRGEnv; finalize=finalize!,
+                    ctmalg=PEPSKit.SimultaneousCTMRG(; maxiter=20, tol=1e-8))
+        return new(T, E, finalize, ctmalg)
     end
 end
 
@@ -19,15 +20,16 @@ function step!(scheme::CTMTNR, trunc::TensorKit.TruncationScheme)
         U = adjoint(Uᵣ)
     end
 
-    @tensor scheme.T[1][-1 -2; -3 -4] := scheme.T[1][1 5; -3 3] * conj(U[1 2; -1]) * U[3 4; -4] *
-                                      scheme.T[1][2 -2; 5 4]
+    @tensor scheme.T[1][-1 -2; -3 -4] := scheme.T[1][1 5; -3 3] * conj(U[1 2; -1]) *
+                                         U[3 4; -4] *
+                                         scheme.T[1][2 -2; 5 4]
 
     @tensor scheme.E.edges[4][-1 -2; -3] := scheme.E.edges[4][-1 1; 3] *
                                             scheme.E.edges[4][3 2; -3] * U[2 1; -2]
     @tensor scheme.E.edges[2][-1 -2; -3] := scheme.E.edges[2][-1 1; 3] *
                                             scheme.E.edges[2][3 2; -3] * conj(U[1 2; -2])
-    
-    scheme.E, = leading_boundary(scheme.E, scheme.T, scheme.ctmalg);
+
+    scheme.E, = leading_boundary(scheme.E, scheme.T, scheme.ctmalg)
 
     return scheme
 end
