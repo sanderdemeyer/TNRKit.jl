@@ -2,6 +2,7 @@ module TNRKit
 using TensorKit, LinearAlgebra
 using LoggingExtras, Printf
 using Zygote, OptimKit, KrylovKit
+using PEPSKit
 
 # stop criteria
 include("utility/stopping.jl")
@@ -18,6 +19,7 @@ include("schemes/gilt-tnr.jl")
 include("schemes/atrg.jl")
 include("schemes/slooptnr.jl")
 include("schemes/looptnr.jl")
+include("schemes/ctmrg_tnr.jl")
 
 export TNRScheme
 export TRG, trg_convcrit
@@ -27,6 +29,7 @@ export ATRG, atrg_convcrit
 export GILTTNR, gilttnr_convcrit
 export SLoopTNR
 export LoopTNR, Ψ_A, Ψ_B, entanglement_filtering!, loop_opt!, loop_opt_var!
+export CTMTNR, step!, finalize!
 export run!
 
 # models
