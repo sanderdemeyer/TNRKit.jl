@@ -19,7 +19,7 @@ include("schemes/gilt-tnr.jl")
 include("schemes/atrg.jl")
 include("schemes/slooptnr.jl")
 include("schemes/looptnr.jl")
-include("schemes/ctmrg_tnr.jl")
+include("schemes/ctmrg_hotrg.jl")
 
 export TNRScheme
 export TRG, trg_convcrit
@@ -29,7 +29,7 @@ export ATRG, atrg_convcrit
 export GILTTNR, gilttnr_convcrit
 export SLoopTNR
 export LoopTNR, Ψ_A, Ψ_B, entanglement_filtering!, loop_opt!, loop_opt_var!
-export CTMTNR, step!, finalize!
+export CTMHOTRG, step!, finalize!
 export run!
 
 # models
