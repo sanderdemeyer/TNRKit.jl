@@ -4,7 +4,7 @@ mutable struct CTMTNR <: TNRScheme
     finalize!::Function
     ctmalg::PEPSKit.CTMRGAlgorithm
     function CTMTNR(T::InfinitePartitionFunction, E::CTMRGEnv; finalize=finalize!,
-                    ctmalg=PEPSKit.SimultaneousCTMRG(; maxiter=20, tol=1e-8))
+                    ctmalg=PEPSKit.SequentialCTMRG(; maxiter=20, tol=1e-8))
         return new(T, E, finalize, ctmalg)
     end
 end
@@ -20,22 +20,24 @@ function step!(scheme::CTMTNR, trunc::TensorKit.TruncationScheme)
         U = adjoint(Uᵣ)
     end
 
-    @tensor scheme.T[1][-1 -2; -3 -4] := scheme.T[1][1 5; -3 3] * conj(U[1 2; -1]) *
+    @tensor A[-1 -2; -3 -4] := scheme.T[1][1 5; -3 3] * conj(U[1 2; -1]) *
                                          U[3 4; -4] *
                                          scheme.T[1][2 -2; 5 4]
+
+    scheme.T = InfinitePartitionFunction(A)
 
     @tensor scheme.E.edges[4][-1 -2; -3] := scheme.E.edges[4][-1 1; 3] *
                                             scheme.E.edges[4][3 2; -3] * U[2 1; -2]
     @tensor scheme.E.edges[2][-1 -2; -3] := scheme.E.edges[2][-1 1; 3] *
                                             scheme.E.edges[2][3 2; -3] * conj(U[1 2; -2])
 
-    scheme.E, = leading_boundary(scheme.E, scheme.T, scheme.ctmalg)
+    scheme.E, = leading_boundary(scheme.E, scheme.T, scheme.ctmalg);
 
     return scheme
 end
 
 function finalize!(scheme::CTMTNR)
-    n = norm(expectation_value(scheme.T, (1, 1) => scheme.T[1], scheme.E))
+    n = norm(@tensor scheme.T[1][1 2; 2 1])
     scheme.T[1] = scheme.T[1] / n
 
     scheme.T[1] = permute(scheme.T[1], ((3, 1), (4, 2)))
