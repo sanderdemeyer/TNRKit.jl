@@ -1,4 +1,4 @@
-mutable struct CTMTNR <: TNRScheme
+mutable struct CTMHOTRG <: TNRScheme
     T::InfinitePartitionFunction
     E::CTMRGEnv
     finalize!::Function
@@ -9,7 +9,7 @@ mutable struct CTMTNR <: TNRScheme
     end
 end
 
-function step!(scheme::CTMTNR, trunc::TensorKit.TruncationScheme)
+function step!(scheme::CTMHOTRG, trunc::TensorKit.TruncationScheme)
     Tranf = Environment_tranfermatrix(scheme.E, scheme.T)
     Trans = Tranf / tr(Tranf)
 
@@ -36,7 +36,7 @@ function step!(scheme::CTMTNR, trunc::TensorKit.TruncationScheme)
     return scheme
 end
 
-function finalize!(scheme::CTMTNR)
+function finalize!(scheme::CTMHOTRG)
     n = norm(@tensor scheme.T[1][1 2; 2 1])
     scheme.T[1] = scheme.T[1] / n
 
