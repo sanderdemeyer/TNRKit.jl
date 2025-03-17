@@ -21,8 +21,8 @@ function step!(scheme::CTMHOTRG, trunc::TensorKit.TruncationScheme)
     end
 
     @tensor A[-1 -2; -3 -4] := scheme.T[1][1 5; -3 3] * conj(U[1 2; -1]) *
-                                         U[3 4; -4] *
-                                         scheme.T[1][2 -2; 5 4]
+                               U[3 4; -4] *
+                               scheme.T[1][2 -2; 5 4]
 
     scheme.T = InfinitePartitionFunction(A)
 
@@ -31,7 +31,7 @@ function step!(scheme::CTMHOTRG, trunc::TensorKit.TruncationScheme)
     @tensor scheme.E.edges[2][-1 -2; -3] := scheme.E.edges[2][-1 1; 3] *
                                             scheme.E.edges[2][3 2; -3] * conj(U[1 2; -2])
 
-    scheme.E, = leading_boundary(scheme.E, scheme.T, scheme.ctmalg);
+    scheme.E, = leading_boundary(scheme.E, scheme.T, scheme.ctmalg)
 
     return scheme
 end
