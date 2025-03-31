@@ -1,5 +1,5 @@
 module TNRKit
-using TensorKit, LinearAlgebra
+using TensorKit, LinearAlgebra, KrylovKit
 using LoggingExtras, Printf
 using PEPSKit: network_value, InfinitePartitionFunction, CTMRGEnv # for c4CTM
 
@@ -16,6 +16,7 @@ include("schemes/hotrg.jl")
 include("schemes/atrg.jl")
 include("schemes/c4ctm.jl")
 include("schemes/rctm.jl")
+include("schemes/looptnr.jl")
 
 export TNRScheme
 export TRG
@@ -24,7 +25,7 @@ export HOTRG
 export ATRG
 export c4CTM
 export rCTM
-export LoopTNR
+export LoopTNR, step!, loop_opt!, entanglement_filtering!
 export run!
 
 # models
