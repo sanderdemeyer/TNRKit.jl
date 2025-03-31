@@ -24,7 +24,7 @@ export HOTRG
 export ATRG
 export c4CTM
 export rCTM
-
+export LoopTNR
 export run!
 
 # models
