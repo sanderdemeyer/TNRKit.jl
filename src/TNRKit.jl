@@ -33,7 +33,8 @@ include("models/ising.jl")
 export classical_ising, classical_ising_symmetric, potts_βc, ising_βc, f_onsager
 
 include("models/gross-neveu.jl")
-export gross_neveu_start
+include("models/hubbard.jl")
+export gross_neveu_start, Hubbard2D_start
 
 include("models/sixvertex.jl")
 export sixvertex
