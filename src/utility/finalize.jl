@@ -1,66 +1,80 @@
-const simple_scheme = Union{TRG,GILTTNR,SLoopTNR}
-const turning_scheme = Union{HOTRG,ATRG}
+const simple_scheme = Union{TRG,ATRG,HOTRG}
 
 # 1x1 unitcell finalize
 function finalize!(scheme::simple_scheme)
-    n = norm(@tensor scheme.T[1 2; 1 2])
+    n = norm(@tensor scheme.T[1 2; 2 1])
     scheme.T /= n
-    return n
-end
-
-function finalize!(scheme::HOTRG_single_impurity)
-    n_T = norm(@tensor scheme.T[1 2; 1 2])
-    n_S = norm(@tensor scheme.S[1 2; 1 2])
-    scheme.T /= n_T
-    scheme.S /= n_S
-    return n_T, n_S
-end
-
-function finalize!(scheme::turning_scheme)
-    n = norm(@tensor scheme.T[1 2; 1 2])
-    scheme.T /= n
-
-    # turn the tensor by 90 degrees
-    scheme.T = permute(scheme.T, ((2, 3), (4, 1)))
     return n
 end
 
 function finalize!(scheme::BTRG)
-    n = norm(@tensor scheme.T[1 2; 3 4] * scheme.S1[4; 2] * scheme.S2[3; 1])
+    n = norm(@tensor scheme.T[1 2; 4 3] * scheme.S1[4; 2] * scheme.S2[3; 1])
     scheme.T /= n
     return n
 end
 
 # 2x2 unitcell finalize
 function finalize_two_by_two!(scheme::simple_scheme)
-    n = norm(@tensor scheme.T[2 5; 1 7] * scheme.T[1 6; 2 8] * scheme.T[3 8; 4 6] *
-                     scheme.T[4 7; 3 5])
-    scheme.T /= (n^(1 / 4))
-    return n
-end
+    n = norm(@tensor scheme.T[7 1; 5 4] * scheme.T[4 2; 6 7] * scheme.T[3 6; 2 8] *
+                     scheme.T[8 5; 1 3])
 
-function finalize_two_by_two!(scheme::turning_scheme)
-    n = norm(@tensor scheme.T[2 5; 1 7] * scheme.T[1 6; 2 8] * scheme.T[3 8; 4 6] *
-                     scheme.T[4 7; 3 5])
     scheme.T /= (n^(1 / 4))
-
-    # turn the tensor by 90 degrees
-    scheme.T = permute(scheme.T, ((2, 3), (4, 1)))
-    return n
+    return n^(1 / 4)
 end
 
 function finalize_two_by_two!(scheme::BTRG)
     n′ = @tensor begin
-        scheme.T[3 7; 1 11] *
-        scheme.S2[1; 2] *
-        scheme.T[2 9; 3 12] *
-        scheme.S1[10; 9] *
-        scheme.T[5 12; 6 10] *
-        scheme.S2[4; 5] *
-        scheme.T[6 11; 4 8] *
-        scheme.S1[8; 7]
+        scheme.T[11 1; 9 8] *
+        scheme.S2[8; 2] *
+        scheme.T[2 6; 10 11] *
+        scheme.S1[3; 6] *
+        scheme.T[7 10; 3 12] *
+        scheme.S2[4; 7] *
+        scheme.T[12 9; 5 4] *
+        scheme.S1[5; 1]
     end
     n = norm(n′)
     scheme.T /= (n^(1 / 4))
+    return n^(1 / 4)
+end
+
+function finalize!(scheme::LoopTNR)
+    T1 = permute(scheme.TA, ((1, 2), (4, 3)))
+    T2 = permute(scheme.TB, ((1, 2), (4, 3)))
+    n = norm(@tensor opt = true T1[1 2; 3 4] * T2[3 5; 1 6] *
+                                T2[7 4; 8 2] * T1[8 6; 7 5])
+
+    scheme.TA /= n^(1 / 4)
+    scheme.TB /= n^(1 / 4)
+    return n^(1 / 4)
+end
+
+function finalize!(scheme::CTMHOTRG)
+    n = norm(@tensor scheme.T[1][1 2; 2 1])
+    scheme.T[1] = scheme.T[1] / n
+
+    scheme.T[1] = permute(scheme.T[1], ((3, 1), (4, 2)))
+    scheme.E = PEPSKit.rotate_north(scheme.E, 2)
     return n
+end
+
+# cft data finalize
+function finalize_cftdata!(scheme::TNRScheme)
+    finalize!(scheme)
+    return cft_data(scheme)
+end
+
+# central charge finalize
+function finalize_central_charge!(scheme::TNRScheme)
+    n = finalize!(scheme)
+    return central_charge(scheme, n)
+end
+
+function finalize_cftdata!(scheme::CTMHOTRG)
+    n = norm(@tensor scheme.T[1][1 2; 2 1])
+    scheme.T[1] = scheme.T[1] / n
+
+    scheme.T[1] = permute(scheme.T[1], ((3, 1), (4, 2)))
+    scheme.E = PEPSKit.rotate_north(scheme.E, 2)
+    return cft_data(TRG(scheme.T[1]); is_real=false)
 end
