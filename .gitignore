@@ -1,4 +1,5 @@
 Manifest.toml
 .ipynb_checkpoints
 .vscode
+docs/build/
 .DS_Store
