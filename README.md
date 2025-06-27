@@ -1,5 +1,5 @@
-![TNRKit Logo](https://github.com/VictorVanthilt/TNRKit.jl/blob/master/docs/src/assets/TNRKitLogo-dark.svg#gh-dark-mode-only)
-![TNRKit Logo](https://github.com/VictorVanthilt/TNRKit.jl/blob/master/docs/src/assets/TNRKitLogo-light.svg#gh-light-mode-only)
+![TNRKit Logo](https://github.com/VictorVanthilt/TNRKit.jl/blob/master/docs/src/assets/logo-dark.svg#gh-dark-mode-only)
+![TNRKit Logo](https://github.com/VictorVanthilt/TNRKit.jl/blob/master/docs/src/assets/logo.svg#gh-light-mode-only)
 
 # TNRKit.jl
 | **Documentation** | **Build Status** |
