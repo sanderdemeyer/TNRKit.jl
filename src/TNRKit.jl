@@ -51,7 +51,7 @@ export run!
 
 # models
 include("models/ising.jl")
-export classical_ising, classical_ising_symmetric, ising_βc, f_onsager,
+export classical_ising, classical_ising_symmetric, ising_βc, f_onsager, ising_cft_exact,
     ising_βc_3D, classical_ising_symmetric_3D, classical_ising_3D
 
 include("models/gross-neveu.jl")
@@ -67,6 +67,9 @@ include("models/clock.jl")
 export classical_clock
 
 # utility functions
+include("utility/free_energy.jl")
+export free_energy
+
 include("utility/cft.jl")
 export cft_data, central_charge, cft_data!
 
