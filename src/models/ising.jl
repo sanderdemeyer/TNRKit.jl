@@ -14,7 +14,7 @@ for the classical Ising model with a given inverse temperature `β` and external
 ### Examples
 ```julia
     classical_ising() # Default inverse temperature is `βc`
-    classical_ising(0.5; h=1.0) # Custom inverse temperature and magnetic field.
+    classical_ising(0.5; h = 1.0) # Custom inverse temperature and magnetic field.
 ```
 !!! info
     When calculating the free energy with `free_energy()`, set the `unitcell` keyword argument to `2.0`.
