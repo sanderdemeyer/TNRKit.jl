@@ -4,6 +4,23 @@ const ising_cft_exact = [
     3, 3, 3,
     25 / 8, 25 / 8, 25 / 8, 25 / 8, 25 / 8, 25 / 8,
 ]
+
+"""
+$(TYPEDSIGNATURES)
+
+Constructs the classical Ising model partition function tensor for a 2D square lattice
+for the Ising model with a given inverse temperature `β` and external magnetic field `h`.
+
+### Examples
+```julia
+    classical_ising() # Default inverse temperature is `βc`
+    classical_ising(0.5; h=1.0) # Custom inverse temperature and magnetic field.
+```
+!!! info
+    When calculating the free energy with `free_energy()`, set the `unitcell` keyword argument to `2.0`.
+    The initial lattice holds 2 spins.
+
+"""
 function classical_ising(β::Number; h = 0)
     function σ(i::Int64)
         return 2i - 3
