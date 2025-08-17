@@ -6,10 +6,10 @@ const ising_cft_exact = [
 ]
 
 """
-$(TYPEDSIGNATURES)
+$(SIGNATURES)
 
-Constructs the classical Ising model partition function tensor for a 2D square lattice
-for the Ising model with a given inverse temperature `β` and external magnetic field `h`.
+Constructs the partition function tensor for a 2D square lattice
+for the classical Ising model with a given inverse temperature `β` and external magnetic field `h`.
 
 ### Examples
 ```julia
