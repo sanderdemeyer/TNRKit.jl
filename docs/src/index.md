@@ -72,7 +72,7 @@ to choose the verbosity level, simply use `run!(...; verbosity=n)`. The default 
 ## Included Models
 TNRKit includes several common models out of the box.
 - Ising model: [`classical_ising`](@ref) and [`classical_ising_symmetric`](@ref), which has a Z2 grading on each leg.
-- Potts model: [`classical_potts`](@ref) and [`classical_potts_symetric`](@ref), which has a Zq grading on each leg.
+- Potts model: [`classical_potts`](@ref) and [`classical_potts_symmetric`](@ref), which has a Zq grading on each leg.
 - Six Vertex model: [`sixvertex`](@ref)
 - Clock model: [`classical_clock`](@ref)
 If you want to implement your own model you must respect the leg-convention assumed by all TNRKit schemes.
