@@ -10,7 +10,7 @@ and computes the free energy.
     The `initial_size` should be set to the intial size of the physical lattice, which is typically `1.0` (or `2.0` for the 2D non-symmetric classical Ising model).
 
 """
-function free_energy(data, β; scalefactor = 2.0, initial_size = 2.0)
+function free_energy(data, β; scalefactor = 2.0, initial_size = 1.0)
     lnz = 0.0
     x = 1.0 - log(initial_size) / log(scalefactor)
     for (i, z) in enumerate(data)
