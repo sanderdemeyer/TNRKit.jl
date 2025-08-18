@@ -2,6 +2,8 @@
 $(SIGNATURES)
 
 returns the inverse critical temperature for the classical q-state Potts model on a 2D square lattice.
+
+See also: [`classical_potts`](@ref), [`classical_potts_symmetric`](@ref).
 """
 potts_βc(q) = log(1.0 + sqrt(q))
 
