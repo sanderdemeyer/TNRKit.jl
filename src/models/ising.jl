@@ -87,7 +87,7 @@ This tensor has explicit ℤ₂ symmetry on each of its spaces.
     classical_ising_symmetric_3D(0.5) # Custom inverse temperature.
 ```
 
-See also:  [`classical_ising_3D`](@ref), `classical_ising`](@ref), [`classical_ising_symmetric`](@ref).
+See also:  [`classical_ising_3D`](@ref), [`classical_ising`](@ref), [`classical_ising_symmetric`](@ref).
 """
 function classical_ising_symmetric_3D(β)
     x = cosh(β)
@@ -112,7 +112,7 @@ classical_ising_symmetric_3D() = classical_ising_symmetric_3D(ising_βc_3D)
 $(SIGNATURES)
 
 Constructs the partition function tensor for a 3D cubic lattice
-for the classical Ising model with a given inverse temperature `β` and coupling constant `J`.
+for the classical Ising model with a given inverse temperature `β` and coupling constant `J` (by default J = `1.0`).
     
 ### Examples
 ```julia
