@@ -1,14 +1,15 @@
 """
-$(SIGNATURES)
+    $(FUNCTIONNAME)(elt::Type{<:Number} = Float64, symmetry::Type{<:Sector} = Trivial; a = 1.0, b = 1.0, c = 1.0)
+    $(FUNCTIONNAME)(symmetry::Type{<:Sector}; kwargs...)
 
 Constructs the partition function tensor for the six-vertex model with a given symmetry type and coupling constants `a`, `b`, and `c`.
 
 ### Defaults
-    - `elt`: `Float64`
-    - `symmetry`: `Trivial`
-    - `a`: `1.0`
-    - `b`: `1.0`
-    - `c`: `1.0`
+    - elt: Float64
+    - symmetry: Trivial
+    - a: 1.0
+    - b: 1.0
+    - c: 1.0
 
 
 ### Examples
