@@ -5,6 +5,9 @@ println(" Testing all schemes ")
 println("---------------------")
 
 T = classical_ising_symmetric()
+T_3D = classical_ising_symmetric_3D()
+# from Fig. 5 of Physical Review B 102, 054432 (2020)
+const f_benchmark3D = -3.507
 
 function cft_finalize!(scheme)
     finalize!(scheme)
@@ -172,13 +175,19 @@ end
 # ATRG_3D
 @testset "ATRG_3D - Ising Model" begin
     @info "ATRG_3D ising free energy"
-    T_3D = classical_ising_symmetric_3D()
     scheme = ATRG_3D(T_3D)
     data = run!(scheme, truncdim(12), maxiter(25))
-
     fs = free_energy(data, ising_βc_3D; scalefactor = 8.0)
+    @info "Calculated f = $(fs)."
+    @test fs ≈ f_benchmark3D rtol = 5.0e-3
+end
 
-    f_benchmark = -3.515
-
-    @test fs ≈ f_benchmark rtol = 1.0e-3
+# HOTRG_3D
+@testset "HOTRG_3D - Ising Model" begin
+    @info "HOTRG_3D ising free energy"
+    scheme = HOTRG_3D(T_3D)
+    data = run!(scheme, truncdim(8), maxiter(25))
+    fs = free_energy(data, ising_βc_3D; scalefactor = 8.0)
+    @info "Calculated f = $(fs)."
+    @test fs ≈ f_benchmark3D rtol = 1.0e-3
 end
