@@ -9,6 +9,7 @@ makedocs(;
     sitename = "TNRKit.jl",
     pages = [
         "Home" => "index.md"
+        "Models" => "models.md"
         "Library" => "lib/lib.md"
         "References" => "references.md"
     ],

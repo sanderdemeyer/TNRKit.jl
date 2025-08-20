@@ -70,12 +70,17 @@ There are 3 levels of verbosity implemented in TNRKit:
 to choose the verbosity level, simply use `run!(...; verbosity=n)`. The default is `verbosity=1`.
 
 ## Included Models
-TNRKit includes several common models out of the box.
-- Ising model: [`classical_ising`](@ref) and [`classical_ising_symmetric`](@ref), which has a Z2 grading on each leg.
-- Potts model: [`classical_potts`](@ref) and [`classical_potts_symmetric`](@ref), which has a Zq grading on each leg.
-- Six Vertex model: [`sixvertex`](@ref)
-- Clock model: [`classical_clock`](@ref)
-If you want to implement your own model you must respect the leg-convention assumed by all TNRKit schemes.
+TNRKit includes several common statistical mechanical models out of the box, each with multiple variants and symmetry options:
+
+- **Classical Ising Model**: 2D and 3D variants with ℤ₂ symmetry options
+- **Classical Potts Model**: q-state generalizations with ℤq symmetry  
+- **Six-Vertex Model**: Ice-type models with multiple symmetry sectors
+- **Classical Clock Model**: q-state rotational models  
+- **Gross-Neveu Model**: Experimental fermionic field theory model
+
+For detailed information about each model including physics background, parameters, usage examples, and implementation notes, see the [Models](@ref) section.
+
+All models respect the TNRKit leg-convention and can be used with any of the available TNR schemes.
 
 ## Leg-convention
 All the schemes assume that the input tensor lives in the space $V_1 \otimes V_2 \leftarrow V_3 \otimes V_4$ and that the legs are ordered in the following way:
