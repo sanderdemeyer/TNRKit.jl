@@ -82,9 +82,9 @@ To choose the verbosity level, simply use `run!(...; verbosity=n)`. The default 
 
 ## Included Models
 TNRKit includes several common models out of the box.
-- 2D Ising model: `classical_ising(β; h=0)` and `classical_ising_symmetric(β)`, which has a $\mathbb{Z}_2$ grading on each leg.
-- 3D Ising model: `classical_ising_3D(β; J=1)` and `classical_ising_symmetric_3D(β)`, which has a $\mathbb{Z}_2$ grading on each leg.
-- Potts model: `classical_potts(q, β)` and `classical_potts_symetric(q, β)`, which has a $\mathbb{Z}_q$ grading on each leg.
+- 2D Ising model: `classical_ising(β; h=0)` and `classical_ising_symmetric(β)`, which has a $ℤ_2$ grading on each leg.
+- 3D Ising model: `classical_ising_3D(β; J=1)` and `classical_ising_symmetric_3D(β)`, which has a $ℤ_2$ grading on each leg.
+- Potts model: `classical_potts(q, β)` and `classical_potts_symetric(q, β)`, which has a $ℤ_q$ grading on each leg.
 - Six Vertex model: `sixvertex(scalartype, spacetype; a=1.0, b=1.0, c=1.0)`
 - Clock model: `classical_clock`
 
@@ -103,4 +103,4 @@ If you want to implement your own model you must respect the leg-convention assu
      2
 ```
 
-The 3D scheme(s) assume that the input tensor lives in the space $V_{\text{D}} \otimes V'_{\text{U}} \leftarrow V_{\text{N}} \otimes V_{\text{E}} \otimes V'_{\text{S}} \otimes V'_{\text{W}}$, where D, U, N, E, S, W stand for Down, Up, North, East, South and West.
+The 3D scheme(s) assume that the input tensor lives in the space $V_{\text{D}} \otimes V_{\text{U}} \prime \leftarrow V_{\text{N}} \otimes V_{\text{E}} \otimes V_{\text{S}} \prime \otimes V_{\text{W}} \prime$, where D, U, N, E, S, W stand for Down, Up, North, East, South and West.
