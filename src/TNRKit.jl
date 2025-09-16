@@ -28,6 +28,8 @@ include("schemes/ctm/c4ctm.jl")
 include("schemes/ctm/rctm.jl")
 include("schemes/ctm/ctm_trg.jl")
 include("schemes/ctm/ctm_hotrg.jl")
+include("schemes/ctm/onesite_ctm.jl")
+include("schemes/ctm/sublattice_ctm.jl")
 
 # Loop Methods
 include("schemes/looptnr.jl")
@@ -44,10 +46,13 @@ export ATRG
 export ATRG_3D
 export VBTRG
 
+export CTM
+export Sublattice_CTM
 export c4CTM
 export rCTM
 export ctm_TRG
 export ctm_HOTRG
+export lnz
 
 export LoopTNR
 export SLoopTNR
