@@ -4,6 +4,7 @@ using LoggingExtras, Printf
 using KrylovKit
 using OptimKit, Zygote
 using PEPSKit: network_value, InfinitePartitionFunction, CTMRGEnv
+using MPSKit # TODO: think of re-exporting VUMPS from MPSKit
 using DocStringExtensions
 
 # stop criteria
@@ -19,6 +20,7 @@ include("schemes/hotrg.jl")
 include("schemes/hotrg3d.jl")
 include("schemes/atrg.jl")
 include("schemes/atrg3d.jl")
+include("schemes/vbtnr.jl")
 
 # CTM methods
 include("schemes/ctm/utility.jl")
@@ -40,6 +42,7 @@ export HOTRG
 export HOTRG_3D
 export ATRG
 export ATRG_3D
+export VBTNR
 
 export c4CTM
 export rCTM
