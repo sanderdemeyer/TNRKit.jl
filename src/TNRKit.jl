@@ -20,7 +20,7 @@ include("schemes/hotrg.jl")
 include("schemes/hotrg3d.jl")
 include("schemes/atrg.jl")
 include("schemes/atrg3d.jl")
-include("schemes/vbtnr.jl")
+include("schemes/vbtrg.jl")
 
 # CTM methods
 include("schemes/ctm/utility.jl")
@@ -42,7 +42,7 @@ export HOTRG
 export HOTRG_3D
 export ATRG
 export ATRG_3D
-export VBTNR
+export VBTRG
 
 export c4CTM
 export rCTM
