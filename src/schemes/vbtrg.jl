@@ -1,7 +1,7 @@
 mutable struct VBTRG{E, S} <: TNRScheme
     T::TensorMap{E, S, 2, 2}
     finalize!::Function
-    function VBTNR(T::TensorMap{E, S, 2, 2}; finalize = (finalize!)) where {E, S}
+    function VBTRG(T::TensorMap{E, S, 2, 2}; finalize = (finalize!)) where {E, S}
         @assert sectortype(T) == Trivial "Only trivial sector type is supported for the tensor T"
         return new{scalartype(T), spacetype(T)}(T, finalize)
     end
@@ -105,7 +105,7 @@ function Γ(x::_vbtrg_intermediate_projector_tlbr)
     return @tensoropt Γ[-1; -2] := x.env.GLs[1][1 2; 3] * x.mps.AC[1][3 4; 5] * x.Ttl[2; 4 -2] * x.env.GRs[1][5 6; 7] * conj(x.mps.AC[1][1 8; 7]) * x.Tbr[9 8; 6] * conj(x.w[9; -1])
 end
 
-function run!(scheme::VBTNR, trunc::TensorKit.TruncationDimension, criterion::stopcrit; inner_trunc = trunc, VUMPSalg = VUMPS(), envdim::Int = trunc.dim)
+function run!(scheme::VBTRG, trunc::TensorKit.TruncationDimension, criterion::stopcrit; inner_trunc = trunc, VUMPSalg = VUMPS(), envdim::Int = trunc.dim)
     data = []
     iter = 0
     crit = true
@@ -147,9 +147,9 @@ function run!(scheme::VBTNR, trunc::TensorKit.TruncationDimension, criterion::st
     return data
 end
 
-const VBTNR_PROJECTOR = Union{_vbtrg_vertical_projector, _vbtrg_horizontal_projector, _vbtrg_intermediate_projector_trbl, _vbtrg_intermediate_projector_tlbr}
+const VBTRG_PROJECTOR = Union{_vbtrg_vertical_projector, _vbtrg_horizontal_projector, _vbtrg_intermediate_projector_trbl, _vbtrg_intermediate_projector_tlbr}
 
-function _update_projector!(proj::VBTNR_PROJECTOR, trunc::TensorKit.TruncationScheme)
+function _update_projector!(proj::VBTRG_PROJECTOR, trunc::TensorKit.TruncationScheme)
     U, S, Vdag = tsvd(Γ(proj); trunc = trunc)
     proj.w = adjoint(Vdag) * adjoint(U)
 
@@ -160,7 +160,7 @@ function _update_projector!(proj::VBTNR_PROJECTOR, trunc::TensorKit.TruncationSc
     return S
 end
 
-function optimize!(proj::VBTNR_PROJECTOR, trunc::TensorKit.TruncationScheme; maxiter::Int = 100, convcrit::Float64 = 1.0e-6)
+function optimize!(proj::VBTRG_PROJECTOR, trunc::TensorKit.TruncationScheme; maxiter::Int = 100, convcrit::Float64 = 1.0e-6)
     S = _update_projector!(proj, trunc)
 
     for iter in 2:maxiter
