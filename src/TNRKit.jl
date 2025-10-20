@@ -20,7 +20,6 @@ include("schemes/hotrg.jl")
 include("schemes/hotrg3d.jl")
 include("schemes/atrg.jl")
 include("schemes/atrg3d.jl")
-include("schemes/impurityhotrg.jl")
 # CTM methods
 include("schemes/ctm/utility.jl")
 include("schemes/ctm/c4ctm.jl")
@@ -29,6 +28,10 @@ include("schemes/ctm/ctm_trg.jl")
 include("schemes/ctm/ctm_hotrg.jl")
 include("schemes/ctm/onesite_ctm.jl")
 include("schemes/ctm/sublattice_ctm.jl")
+
+# Impurity methods
+include("schemes/impuritytrg.jl")
+include("schemes/impurityhotrg.jl")
 
 # Loop Methods
 include("schemes/looptnr.jl")
@@ -43,7 +46,6 @@ export HOTRG
 export HOTRG_3D
 export ATRG
 export ATRG_3D
-export ImpurityHOTRG
 
 export CTM
 export Sublattice_CTM
@@ -52,6 +54,9 @@ export rCTM
 export ctm_TRG
 export ctm_HOTRG
 export lnz
+
+export ImpurityTRG
+export ImpurityHOTRG
 
 export LoopTNR
 export SLoopTNR
