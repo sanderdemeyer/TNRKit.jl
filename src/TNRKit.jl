@@ -20,7 +20,6 @@ include("schemes/hotrg.jl")
 include("schemes/hotrg3d.jl")
 include("schemes/atrg.jl")
 include("schemes/atrg3d.jl")
-
 # CTM methods
 include("schemes/ctm/utility.jl")
 include("schemes/ctm/c4ctm.jl")
@@ -29,6 +28,10 @@ include("schemes/ctm/ctm_trg.jl")
 include("schemes/ctm/ctm_hotrg.jl")
 include("schemes/ctm/onesite_ctm.jl")
 include("schemes/ctm/sublattice_ctm.jl")
+
+# Impurity methods
+include("schemes/impuritytrg.jl")
+include("schemes/impurityhotrg.jl")
 
 # Loop Methods
 include("schemes/looptnr.jl")
@@ -52,6 +55,9 @@ export ctm_TRG
 export ctm_HOTRG
 export lnz
 
+export ImpurityTRG
+export ImpurityHOTRG
+
 export LoopTNR
 export SLoopTNR
 
@@ -60,7 +66,7 @@ export run!
 # models
 include("models/ising.jl")
 export classical_ising, classical_ising_symmetric, ising_βc, f_onsager, ising_cft_exact,
-    ising_βc_3D, classical_ising_symmetric_3D, classical_ising_3D
+    ising_βc_3D, classical_ising_symmetric_3D, classical_ising_3D, classical_ising_impurity
 
 include("models/gross-neveu.jl")
 export gross_neveu_start
@@ -69,7 +75,7 @@ include("models/sixvertex.jl")
 export sixvertex
 
 include("models/potts.jl")
-export classical_potts, classical_potts_symmetric, potts_βc
+export classical_potts, classical_potts_symmetric, potts_βc, classical_potts_impurity
 
 include("models/clock.jl")
 export classical_clock
