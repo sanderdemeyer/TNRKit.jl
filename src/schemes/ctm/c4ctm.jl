@@ -59,7 +59,7 @@ function step!(scheme::c4CTM, trunc)
     mat, U, S = find_U_sym(scheme, trunc)
 
     @tensor scheme.C[-1; -2] := mat[1 2; 3 4] * U[3 4; -2] * conj(U[1 2; -1])
-    @tensor scheme.E[-1 -2; -3] := scheme.E[1 5; 3] * flip(scheme.T, (1,2); inv = true)[2 -2; 5 4] *
+    @tensor scheme.E[-1 -2; -3] := scheme.E[1 5; 3] * flip(scheme.T, (1, 2); inv = true)[2 -2; 5 4] *
         U[3 4; -3] *
         conj(U[1 2; -1])
 
@@ -69,7 +69,7 @@ function step!(scheme::c4CTM, trunc)
 end
 
 function lnz(scheme::c4CTM)
-    Z, env = tensor2env(flip(scheme.T, (1,2); inv = true), scheme.C, scheme.E)
+    Z, env = tensor2env(flip(scheme.T, (1, 2); inv = true), scheme.C, scheme.E)
     return real(log(network_value(Z, env)))
 end
 
