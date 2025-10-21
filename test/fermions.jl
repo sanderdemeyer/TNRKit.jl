@@ -65,9 +65,10 @@ end
     data_c4CTM = run!(c4CTM(T_c4v_unflipped), truncdim(8), maxiter(10))
     free_energy_c4CTM = -data_c4CTM / β
 
-    schemes = [TRG, BTRG, LoopTNR] # HOTRG and ATRG do not seem to work
+    schemes = [TRG, BTRG, HOTRG, ATRG, LoopTNR]
     for scheme = schemes
         data = run!(scheme(T_c4v_flipped), truncdim(8), maxiter(10))
-        @test free_energy_c4CTM ≈ free_energy(data, β) rtol = 1.0e-10
+        scalefactor = scheme ∈ [HOTRG, ATRG] ? 4.0 : 2.0
+        @test free_energy_c4CTM ≈ free_energy(data, β; scalefactor) rtol = 1.0e-10
     end
 end
