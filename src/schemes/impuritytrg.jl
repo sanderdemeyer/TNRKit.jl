@@ -9,7 +9,7 @@ Impurity method for Tensor Renormalization Group
 ### Running the algorithm
     run!(::ImpurityTRG, trunc::TensorKit.TruncationSheme, stop::Stopcrit[, finalize_beginning=true, verbosity=1])
 
-Each step rescales the lattice by a (linear) factor of 2
+Each step rescales the lattice by a (linear) factor of √2
 
 !!! info "verbosity levels"
     - 0: No output
