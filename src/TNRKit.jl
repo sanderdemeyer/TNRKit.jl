@@ -22,7 +22,7 @@ include("schemes/atrg.jl")
 include("schemes/atrg3d.jl")
 # CTM methods
 include("schemes/ctm/utility.jl")
-include("schemes/ctm/c4ctm.jl")
+include("schemes/ctm/c4vctm.jl")
 include("schemes/ctm/rctm.jl")
 include("schemes/ctm/ctm_trg.jl")
 include("schemes/ctm/ctm_hotrg.jl")
@@ -49,7 +49,7 @@ export ATRG_3D
 
 export CTM
 export Sublattice_CTM
-export c4CTM
+export c4vCTM
 export rCTM
 export ctm_TRG
 export ctm_HOTRG

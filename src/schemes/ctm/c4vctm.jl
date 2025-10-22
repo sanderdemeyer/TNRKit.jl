@@ -1,16 +1,16 @@
-mutable struct c4CTM{A, S}
+mutable struct c4vCTM{A, S}
     T::TensorMap{A, S, 0, 4}
     C::TensorMap{A, S, 1, 1}
     E::TensorMap{A, S, 2, 1}
 
-    function c4CTM(T::TensorMap{A, S, 0, 4}) where {A, S}
-        C, E = c4CTM_init(T)
+    function c4vCTM(T::TensorMap{A, S, 0, 4}) where {A, S}
+        C, E = c4vCTM_init(T)
 
         return new{A, S}(T, C, E)
     end
 end
 
-function c4CTM(T_flipped::TensorMap{A, S, 2, 2}; symmetrize = false) where {A, S}
+function c4vCTM(T_flipped::TensorMap{A, S, 2, 2}; symmetrize = false) where {A, S}
     T_unflipped = permute(flip(T_flipped, (1, 2); inv = true), ((), (3, 4, 2, 1)))
     if symmetrize
         T_unflipped = symmetrize_C4v(T_unflipped)
@@ -18,7 +18,7 @@ function c4CTM(T_flipped::TensorMap{A, S, 2, 2}; symmetrize = false) where {A, S
         @assert norm(T_flipped - T_flipped') < 1.0e-14
         @assert norm(T_unflipped - rotl90_pf(T_unflipped)) < 1.0e-14
     end
-    return c4CTM(T_unflipped)
+    return c4vCTM(T_unflipped)
 end
 
 function rotl90_pf(T::TensorMap{A, S, 2, 2}) where {A, S}
@@ -53,7 +53,7 @@ end
 =#
 
 function run!(
-        scheme::c4CTM, trunc::TensorKit.TruncationScheme, criterion::stopcrit;
+        scheme::c4vCTM, trunc::TensorKit.TruncationScheme, criterion::stopcrit;
         verbosity = 1
     )
     LoggingExtras.withlevel(; verbosity) do
@@ -83,7 +83,7 @@ function run!(
     return lnz(scheme)
 end
 
-function step!(scheme::c4CTM, trunc)
+function step!(scheme::c4vCTM, trunc)
     mat, U, S = find_U_sym(scheme, trunc)
 
     @tensor scheme.C[-1; -2] := mat[1 2; 3 4] * U[3 4; -2] * conj(U[1 2; -1])
@@ -96,7 +96,7 @@ function step!(scheme::c4CTM, trunc)
     return S
 end
 
-function lnz(scheme::c4CTM)
+function lnz(scheme::c4vCTM)
     Z, env = tensor2env(permute(flip(scheme.T, (3, 4); inv = true), ((4, 3), (1, 2))), scheme.C, scheme.E)
     # should be inv = false ??
     return real(log(network_value(Z, env)))
@@ -118,7 +118,7 @@ function find_U_sym(scheme, trunc)
     return mat, U, S
 end
 
-function c4CTM_init(T::TensorMap{A, S, 0, 4}) where {A, S}
+function c4vCTM_init(T::TensorMap{A, S, 0, 4}) where {A, S}
     S_type = scalartype(T)
     Vp = space(T)[1]'
     C = TensorMap(ones, S_type, oneunit(Vp) ← oneunit(Vp))
@@ -140,8 +140,8 @@ function tensor2env(O, C, T)
     return Z, env
 end
 
-function Base.show(io::IO, scheme::c4CTM)
-    println(io, "c4CTM - c4 symmetric Corner Transfer Matrix")
+function Base.show(io::IO, scheme::c4vCTM)
+    println(io, "c4vCTM - C4v symmetric Corner Transfer Matrix")
     println(io, "  * T: $(summary(scheme.T))")
     println(io, "  * C: $(summary(scheme.C))")
     println(io, "  * E: $(summary(scheme.E))")

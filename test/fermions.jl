@@ -36,8 +36,8 @@ end
     @test free_energy(data, 1.0) ≈ f_bench rtol = 1.0e-3
 end
 
-# === c4CTM ===
-@testset "c4CTM - Gross-Neveu Model" begin
+# === c4vCTM ===
+@testset "c4vCTM - Gross-Neveu Model" begin
     # Use the Gross-Neveu model, but symmetrize the tensor such that the conditions of C4vCTM are satisfied
     T_flipped = gross_neveu_start(0, 0, 0)
     T_unflipped = permute(flip(T_flipped, (1, 2); inv = true), ((), (3, 4, 2, 1)))
@@ -48,14 +48,14 @@ end
 
     β = 1.0
 
-    # Calculate the free energy using c4CTM
-    data_c4CTM = run!(c4CTM(T_flipped_C4v), truncdim(8), maxiter(10))
-    free_energy_c4CTM = -data_c4CTM / β
+    # Calculate the free energy using c4vCTM
+    data_c4vCTM = run!(c4vCTM(T_flipped_C4v), truncdim(8), maxiter(10))
+    free_energy_c4vCTM = -data_c4vCTM / β
 
     schemes = [TRG, BTRG, HOTRG, ATRG, LoopTNR]
     for scheme in schemes
         data = run!(scheme(T_flipped_C4v), truncdim(8), maxiter(10))
         scalefactor = scheme ∈ [HOTRG, ATRG] ? 4.0 : 2.0
-        @test free_energy_c4CTM ≈ free_energy(data, β; scalefactor) rtol = 1.0e-10
+        @test free_energy_c4vCTM ≈ free_energy(data, β; scalefactor) rtol = 1.0e-10
     end
 end
