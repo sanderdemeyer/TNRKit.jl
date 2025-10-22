@@ -40,9 +40,9 @@ end
 @testset "c4CTM - Gross-Neveu Model" begin
     # Use the Gross-Neveu model, but symmetrize the tensor such that the conditions of C4vCTM are satisfied
     T_flipped = gross_neveu_start(0, 0, 0)
-    T_unflipped = permute(flip(T_flipped, (1, 2); inv = true), ((),(3,4,2,1)))
+    T_unflipped = permute(flip(T_flipped, (1, 2); inv = true), ((), (3, 4, 2, 1)))
     T_unflipped_C4v = TNRKit.symmetrize_C4v(T_unflipped)
-    T_flipped_C4v = permute(flip(T_unflipped_C4v, (3, 4); inv = false), ((4,3),(1,2)))
+    T_flipped_C4v = permute(flip(T_unflipped_C4v, (3, 4); inv = false), ((4, 3), (1, 2)))
 
     # Check symmetries
 

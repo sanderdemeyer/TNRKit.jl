@@ -11,7 +11,7 @@ mutable struct c4CTM{A, S}
 end
 
 function c4CTM(T_flipped::TensorMap{A, S, 2, 2}; symmetrize = false) where {A, S}
-    T_unflipped = permute(flip(T_flipped, (1, 2); inv = true), ((),(3,4,2,1)))
+    T_unflipped = permute(flip(T_flipped, (1, 2); inv = true), ((), (3, 4, 2, 1)))
     if symmetrize
         T_unflipped = symmetrize_C4v(T_unflipped)
     else
@@ -32,9 +32,9 @@ end
 
 function symmetrize_C4v(T_unflipped)
     T_c4_unflipped = (T_unflipped + rotl90_pf(T_unflipped) + rotl90_pf(rotl90_pf(T_unflipped)) + rotl90_pf(rotl90_pf(rotl90_pf(T_unflipped)))) / 4
-    T_c4_flipped = permute(flip(T_c4_unflipped, (3, 4); inv = false), ((4,3),(1,2)))
+    T_c4_flipped = permute(flip(T_c4_unflipped, (3, 4); inv = false), ((4, 3), (1, 2)))
     T_c4v_flipped = (T_c4_flipped + T_c4_flipped') / 2
-    T_c4v_unflipped = permute(flip(T_c4v_flipped, (1, 2); inv = true), ((),(3,4,2,1)))
+    T_c4v_unflipped = permute(flip(T_c4v_flipped, (1, 2); inv = true), ((), (3, 4, 2, 1)))
     return T_c4v_unflipped
 end
 
@@ -97,8 +97,8 @@ function step!(scheme::c4CTM, trunc)
 end
 
 function lnz(scheme::c4CTM)
-    Z, env = tensor2env(permute(flip(scheme.T, (3, 4); inv = true), ((4,3),(1,2))), scheme.C, scheme.E)
-    # should be inv = false ?? 
+    Z, env = tensor2env(permute(flip(scheme.T, (3, 4); inv = true), ((4, 3), (1, 2))), scheme.C, scheme.E)
+    # should be inv = false ??
     return real(log(network_value(Z, env)))
 end
 
