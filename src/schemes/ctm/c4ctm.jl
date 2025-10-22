@@ -1,13 +1,41 @@
 mutable struct c4CTM{A, S}
-    T::TensorMap{A, S, 2, 2}
+    T::TensorMap{A, S, 0, 4}
     C::TensorMap{A, S, 1, 1}
     E::TensorMap{A, S, 2, 1}
 
-    function c4CTM(T::TensorMap{A, S, 2, 2}) where {A, S}
+    function c4CTM(T::TensorMap{A, S, 0, 4}) where {A, S}
         C, E = c4CTM_init(T)
 
         return new{A, S}(T, C, E)
     end
+end
+
+function c4CTM(T_flipped::TensorMap{A, S, 2, 2}; symmetrize = false) where {A, S}
+    T_unflipped = permute(flip(T_flipped, (1, 2); inv = true), ((),(3,4,2,1)))
+    if symmetrize
+        T_unflipped = symmetrize_C4v(T_unflipped)
+    else
+        @assert norm(T_flipped - T_flipped') < 1.0e-14
+        @assert norm(T_unflipped - rotl90_pf(T_unflipped)) < 1.0e-14
+    end
+    return c4CTM(T_unflipped)
+end
+
+function rotl90_pf(T::TensorMap{A, S, 2, 2}) where {A, S}
+    return permute(T, ((3, 1), (4, 2)))
+end
+
+function rotl90_pf(T::TensorMap{A, S, 0, 4}) where {A, S}
+    return permute(T, ((), (2, 3, 4, 1)))
+end
+
+
+function symmetrize_C4v(T_unflipped)
+    T_c4_unflipped = (T_unflipped + rotl90_pf(T_unflipped) + rotl90_pf(rotl90_pf(T_unflipped)) + rotl90_pf(rotl90_pf(rotl90_pf(T_unflipped)))) / 4
+    T_c4_flipped = permute(flip(T_c4_unflipped, (3, 4); inv = false), ((4,3),(1,2)))
+    T_c4v_flipped = (T_c4_flipped + T_c4_flipped') / 2
+    T_c4v_unflipped = permute(flip(T_c4v_flipped, (1, 2); inv = true), ((),(3,4,2,1)))
+    return T_c4v_unflipped
 end
 
 # Below, I wrote a code with the following correspondence. (O,C,T) <=> (scheme.T, scheme.C, scheme.E)
@@ -59,7 +87,7 @@ function step!(scheme::c4CTM, trunc)
     mat, U, S = find_U_sym(scheme, trunc)
 
     @tensor scheme.C[-1; -2] := mat[1 2; 3 4] * U[3 4; -2] * conj(U[1 2; -1])
-    @tensor scheme.E[-1 -2; -3] := scheme.E[1 5; 3] * flip(scheme.T, (1, 2); inv = true)[2 -2; 5 4] *
+    @tensor scheme.E[-1 -2; -3] := scheme.E[1 5; 3] * flip(scheme.T, (3, 4); inv = true)[5 4 -2 2] *
         U[3 4; -3] *
         conj(U[1 2; -1])
 
@@ -69,14 +97,15 @@ function step!(scheme::c4CTM, trunc)
 end
 
 function lnz(scheme::c4CTM)
-    Z, env = tensor2env(flip(scheme.T, (1, 2); inv = true), scheme.C, scheme.E)
+    Z, env = tensor2env(permute(flip(scheme.T, (3, 4); inv = true), ((4,3),(1,2))), scheme.C, scheme.E)
+    # should be inv = false ?? 
     return real(log(network_value(Z, env)))
 end
 
 function build_corner_matrix(scheme)
     @tensor opt = true mat[-1 -2; -3 -4] := scheme.C[1; 2] * scheme.E[-1 3; 1] *
         scheme.E[2 4; -3] *
-        flip(scheme.T, 2; inv = true)[3 -2; 4 -4]
+        flip(scheme.T, 3; inv = true)[4 -4 -2 3]
     return mat
 end
 
@@ -89,9 +118,9 @@ function find_U_sym(scheme, trunc)
     return mat, U, S
 end
 
-function c4CTM_init(T::TensorMap{A, S, 2, 2}) where {A, S}
+function c4CTM_init(T::TensorMap{A, S, 0, 4}) where {A, S}
     S_type = scalartype(T)
-    Vp = space(T)[3]'
+    Vp = space(T)[1]'
     C = TensorMap(ones, S_type, oneunit(Vp) ← oneunit(Vp))
     E = TensorMap(ones, S_type, oneunit(Vp) ⊗ Vp ← oneunit(Vp))
     return C, E

@@ -169,8 +169,7 @@ end
 # c4CTM
 @testset "c4CTM - Ising Model" begin
     @info "c4CTM ising free energy"
-    T_ferm = flip(T, (1, 2); inv = true)
-    scheme = c4CTM(T_ferm)
+    scheme = c4CTM(T)
     lz = run!(scheme, truncdim(24), trivial_convcrit(1.0e-9); verbosity = 1)
 
     fs = lz * -1 / ising_βc
