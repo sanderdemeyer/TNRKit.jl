@@ -7,8 +7,8 @@ C4v symmetric Corner Transfer Matrix Renormalization Group
     $(FUNCTIONNAME)(T)
     $(FUNCTIONNAME)(T, [, symmetrize=false])
 
-c4vCTM can be called with a (2,2) tensor (West, South, North, East) with the usual arrow conventions, 
-or with a (0,4) tensor (North, East, South, West).
+c4vCTM can be called with a (2,2) tensor (West, South, North, East) with the usual arrow conventions (flipped arrow convention), 
+or with a (0,4) tensor (North, East, South, West) (unflipped arrow convention).
 The keyword argument symmetrize makes the tensor C4v symmetric when set to true. If symmetrize = false, it checks the symmetry explicitly.
 
 ### Running the algorithm
@@ -47,6 +47,7 @@ function c4vCTM(T_flipped::TensorMap{A, S, 2, 2}; symmetrize = false) where {A, 
     return c4vCTM(T_unflipped)
 end
 
+# Functions to permute (flipped and unflipped) tensors under 90 degree rotation
 function rotl90_pf(T::TensorMap{A, S, 2, 2}) where {A, S}
     return permute(T, ((3, 1), (4, 2)))
 end
@@ -55,7 +56,7 @@ function rotl90_pf(T::TensorMap{A, S, 0, 4}) where {A, S}
     return permute(T, ((), (2, 3, 4, 1)))
 end
 
-
+# Function to construct a C4v symmetric tensor from a given tensor in the unflipped arrow convention
 function symmetrize_C4v(T_unflipped)
     T_c4_unflipped = (T_unflipped + rotl90_pf(T_unflipped) + rotl90_pf(rotl90_pf(T_unflipped)) + rotl90_pf(rotl90_pf(rotl90_pf(T_unflipped)))) / 4
     T_c4_flipped = permute(flip(T_c4_unflipped, (3, 4); inv = false), ((4, 3), (1, 2)))
