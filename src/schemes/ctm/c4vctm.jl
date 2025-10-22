@@ -1,3 +1,29 @@
+"""
+$(TYPEDEF)
+
+C4v symmetric Corner Transfer Matrix Renormalization Group
+
+### Constructors
+    $(FUNCTIONNAME)(T)
+    $(FUNCTIONNAME)(T, [, symmetrize=false])
+
+c4vCTM can be called with a (2,2) tensor (West, South, North, East) with the usual arrow conventions, 
+or with a (0,4) tensor (North, East, South, West).
+The keyword argument symmetrize makes the tensor C4v symmetric when set to true. If symmetrize = false, it checks the symmetry explicitly.
+
+### Running the algorithm
+    run!(::c4vCTM, trunc::TensorKit.TruncationSheme, stop::Stopcrit[, finalize_beginning=true, verbosity=1])
+
+!!! info "verbosity levels"
+    - 0: No output
+    - 1: Print information at start and end of the algorithm
+    - 2: Print information at each step
+
+### Fields
+
+$(TYPEDFIELDS)
+"""
+
 mutable struct c4vCTM{A, S}
     T::TensorMap{A, S, 0, 4}
     C::TensorMap{A, S, 1, 1}
