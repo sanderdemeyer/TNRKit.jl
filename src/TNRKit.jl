@@ -30,7 +30,7 @@ include("schemes/ctm/ctm_hotrg.jl")
 include("schemes/ctm/onesite_ctm.jl")
 include("schemes/ctm/sublattice_ctm.jl")
 
-include("schemes/ctm/c6CTM_triangular.jl")
+include("schemes/ctm/c6vCTM_triangular.jl")
 
 # Loop Methods
 include("schemes/looptnr.jl")
@@ -54,7 +54,7 @@ export ctm_TRG
 export ctm_HOTRG
 export lnz
 
-export c6CTM_triangular
+export c6vCTM_triangular
 
 export LoopTNR
 export SLoopTNR
@@ -66,7 +66,8 @@ include("models/ising.jl")
 include("models/ising_triangular.jl")
 export classical_ising, classical_ising_symmetric, ising_βc, f_onsager, ising_cft_exact,
     ising_βc_3D, classical_ising_symmetric_3D, classical_ising_3D,
-    classical_ising_symmetric_triangular
+    classical_ising_triangular, classical_ising_triangular_symmetric, 
+    ising_βc_triangular, f_onsager_triangular
 
 include("models/gross-neveu.jl")
 export gross_neveu_start
