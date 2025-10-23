@@ -66,7 +66,7 @@ include("models/ising.jl")
 include("models/ising_triangular.jl")
 export classical_ising, classical_ising_symmetric, ising_βc, f_onsager, ising_cft_exact,
     ising_βc_3D, classical_ising_symmetric_3D, classical_ising_3D,
-    classical_ising_triangular, classical_ising_triangular_symmetric, 
+    classical_ising_triangular, classical_ising_triangular_symmetric,
     ising_βc_triangular, f_onsager_triangular
 
 include("models/gross-neveu.jl")

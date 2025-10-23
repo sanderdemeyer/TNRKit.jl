@@ -10,7 +10,6 @@
         lz = run!(scheme, truncdim(24), maxiter(50))
 
         fs = lz * -1 / ising_βc_triangular
-        # @test lz ≈ lz_onsager_triangular rtol = 1.0e-3
         @test fs ≈ f_onsager_triangular rtol = 1.0e-3
     end
 end
