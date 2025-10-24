@@ -166,10 +166,10 @@ end
     @test fs ≈ f_onsager rtol = 2.0e-5
 end
 
-# c4CTM
-@testset "c4CTM - Ising Model" begin
-    @info "c4CTM ising free energy"
-    scheme = c4CTM(T)
+# c4vCTM
+@testset "c4vCTM - Ising Model" begin
+    @info "c4vCTM ising free energy"
+    scheme = c4vCTM(T)
     lz = run!(scheme, truncdim(24), trivial_convcrit(1.0e-9); verbosity = 1)
 
     fs = lz * -1 / ising_βc
