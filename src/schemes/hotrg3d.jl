@@ -33,6 +33,7 @@ mutable struct HOTRG_3D <: TNRScheme
     end
 end
 
+# Twist the i-th leg of a tensor `t` if it represents a dual space.
 function twistdual!(t::AbstractTensorMap, i::Int)
     isdual(space(t, i)) || return t
     return twist!(t, i)
