@@ -7,7 +7,7 @@ The edges are given in an array of size 4, in the order north, east, south, west
 
 function network_value(T, corners, edges)
     return _contract_site(T, corners, edges) * _contract_corners(corners) /
-            _contract_vertical_edges(corners, edges) / _contract_horizontal_edges(corners, edges)
+        _contract_vertical_edges(corners, edges) / _contract_horizontal_edges(corners, edges)
 end
 
 function _contract_site(T, corners, edges)
