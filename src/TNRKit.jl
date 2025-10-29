@@ -86,7 +86,7 @@ include("utility/cft.jl")
 export cft_data, central_charge, cft_data!
 
 include("utility/finalize.jl")
-export finalize!, finalize_two_by_two!, finalize_cftdata!, finalize_central_charge!
+export Finalizer, two_by_two_Finalizer, finalize!, finalize_two_by_two!, finalize_cftdata!, finalize_central_charge!
 
 include("utility/cdl.jl")
 export cdl_tensor
