@@ -37,7 +37,7 @@ The keyword argument symmetrize makes the tensor C6v symmetric when set to true.
 $(TYPEDFIELDS)
 
 ### References
-* [Naumann et al. Phys. Rev. B 113(4) (2026)](@cite naumann2026)
+* [Lukin et al. Phys. Rev. B 107.054424 (2023)](@cite Lukin2023)
 """
 mutable struct c3vCTM_honeycomb{A, S}
     T::TensorMap{A, S, 0, 3}
