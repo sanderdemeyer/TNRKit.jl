@@ -1,5 +1,5 @@
-const ising_βc_honeycomb = 2/(1.012*3)
-const f_onsager_honeycomb = -1.0251 / ising_βc_honeycomb
+const ising_βc_honeycomb = BigFloat(BigFloat(asinh(BigFloat(sqrt(BigFloat(3.0))))) / BigFloat(2.0))
+const f_onsager_honeycomb::BigFloat = -1.556707467816387475214957698255679494804
 
 """
 $(SIGNATURES)
