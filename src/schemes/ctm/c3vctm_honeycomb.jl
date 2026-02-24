@@ -93,10 +93,10 @@ end
 # https://arxiv.org/abs/2209.03428
 
 function run!(
-    scheme::c3vCTM_honeycomb, trunc::TruncationStrategy, criterion::stopcrit;
-    verbosity = 1
-)
-LoggingExtras.withlevel(; verbosity) do
+        scheme::c3vCTM_honeycomb, trunc::TruncationStrategy, criterion::stopcrit;
+        verbosity = 1
+    )
+    LoggingExtras.withlevel(; verbosity) do
         @infov 1 "Starting simulation\n $(scheme)\n"
         steps = 0
         crit = true
@@ -127,24 +127,24 @@ function step!(scheme::c3vCTM_honeycomb, trunc)
 end
 
 function calculate_projectors(scheme, trunc)
-    @tensor opt=true mat[χout Dout; χin Din] := scheme.L[χout DNW; χN] * scheme.C[χN χNE] * scheme.R[χNE DE; χin] * 
-    scheme.T[DNW DE DC] * conj(scheme.T[Din DC Dout])
+    @tensor opt = true mat[χout Dout; χin Din] := scheme.L[χout DNW; χN] * scheme.C[χN χNE] * scheme.R[χNE DE; χin] *
+        scheme.T[DNW DE DC] * conj(scheme.T[Din DC Dout])
 
     D, W = eig_trunc(mat; trunc)
     return D, W
 end
 
 function renormalize_corners!(scheme, W)
-    @tensor opt=true scheme.C[χout; χin] := scheme.L[χWc DNW; χN] * scheme.C[χN χNE] * scheme.R[χNE DE; χE] * 
-    scheme.T[DNW DE DC] * conj(flip(scheme.T, 1)[Din Dout DC]) * 
-    W[χE Din; χin] * conj(W[χWc Dout; χout])
+    return @tensor opt = true scheme.C[χout; χin] := scheme.L[χWc DNW; χN] * scheme.C[χN χNE] * scheme.R[χNE DE; χE] *
+        scheme.T[DNW DE DC] * conj(flip(scheme.T, 1)[Din Dout DC]) *
+        W[χE Din; χin] * conj(W[χWc Dout; χout])
 end
 
 function renormalize_edges!(scheme, W)
-    @tensor opt=true scheme.L[χout Dout; χin] := scheme.L[χ1 D1; χ2] * scheme.T[D1 D2 D3] * conj(scheme.T[Dout D4 D3]) * 
-    W[χ2 D2; χin] * conj(W[χ1 D4; χout])
-    @tensor opt=true scheme.R[χout Dout; χin] := flip(scheme.R, 2)[χ1 D1; χ2] * conj(scheme.T[D2 D3 D1]) * flip(scheme.T, 3)[D2 D4 Dout] * 
-    W[χ2 D4; χin] * conj(W[χ1 D3; χout])
+    @tensor opt = true scheme.L[χout Dout; χin] := scheme.L[χ1 D1; χ2] * scheme.T[D1 D2 D3] * conj(scheme.T[Dout D4 D3]) *
+        W[χ2 D2; χin] * conj(W[χ1 D4; χout])
+    return @tensor opt = true scheme.R[χout Dout; χin] := flip(scheme.R, 2)[χ1 D1; χ2] * conj(scheme.T[D2 D3 D1]) * flip(scheme.T, 3)[D2 D4 Dout] *
+        W[χ2 D4; χin] * conj(W[χ1 D3; χout])
 end
 
 function error_measure(scheme)
@@ -170,24 +170,24 @@ function _contract_corners(scheme::c3vCTM_honeycomb)
 end
 
 function _contract_site_large(scheme::c3vCTM_honeycomb)
-    return @tensor opt=true scheme.C[χSWR; χNW] * scheme.C[χNW; χNL] * scheme.L[χNL DNW; χNR] * 
-    scheme.C[χNR χNEL] * scheme.R[χNEL DE; χNER] *
-    scheme.C[χNER; χSE] * scheme.C[χSE; χSL] * scheme.L[χSL DSE; χSR] * 
-    scheme.C[χSR; χSWL] * scheme.R[χSWL DW; χSWR] * 
-    scheme.T[DNW DE DC] * conj(flip(scheme.T, [1 2])[DSE DW DC])
+    return @tensor opt = true scheme.C[χSWR; χNW] * scheme.C[χNW; χNL] * scheme.L[χNL DNW; χNR] *
+        scheme.C[χNR χNEL] * scheme.R[χNEL DE; χNER] *
+        scheme.C[χNER; χSE] * scheme.C[χSE; χSL] * scheme.L[χSL DSE; χSR] *
+        scheme.C[χSR; χSWL] * scheme.R[χSWL DW; χSWR] *
+        scheme.T[DNW DE DC] * conj(flip(scheme.T, [1 2])[DSE DW DC])
 end
 
 function _contract_edges_L(scheme::c3vCTM_honeycomb)
-    return @tensor opt=true scheme.C[χSWR; χNW] * scheme.C[χNW; χNL] * scheme.L[χNL DNW; χNR] * 
-    scheme.C[χNR χNE] * scheme.C[χNE; χSEL] * scheme.L[χSEL DE; χSER] *
-    scheme.C[χSER; χS] * scheme.C[χS; χSWL] * scheme.L[χSWL DSW; χSWR] * 
-    scheme.T[DNW DE DSW]
+    return @tensor opt = true scheme.C[χSWR; χNW] * scheme.C[χNW; χNL] * scheme.L[χNL DNW; χNR] *
+        scheme.C[χNR χNE] * scheme.C[χNE; χSEL] * scheme.L[χSEL DE; χSER] *
+        scheme.C[χSER; χS] * scheme.C[χS; χSWL] * scheme.L[χSWL DSW; χSWR] *
+        scheme.T[DNW DE DSW]
 end
 
 function _contract_edges_R(scheme::c3vCTM_honeycomb)
-    return @tensor opt=true scheme.C[χSWR; χNW] * scheme.C[χNW; χNL] * scheme.R[χNL DNW; χNR] * 
-    scheme.C[χNR χNE] * scheme.C[χNE; χSEL] * scheme.R[χSEL DE; χSER] *
-    scheme.C[χSER; χS] * scheme.C[χS; χSWL] * scheme.R[χSWL DSW; χSWR] * 
-    conj(flip(scheme.T, [1 2 3])[DE DNW DSW])
+    return @tensor opt = true scheme.C[χSWR; χNW] * scheme.C[χNW; χNL] * scheme.R[χNL DNW; χNR] *
+        scheme.C[χNR χNE] * scheme.C[χNE; χSEL] * scheme.R[χSEL DE; χSER] *
+        scheme.C[χSER; χS] * scheme.C[χS; χSWL] * scheme.R[χSWL DSW; χSWR] *
+        conj(flip(scheme.T, [1 2 3])[DE DNW DSW])
 
 end
