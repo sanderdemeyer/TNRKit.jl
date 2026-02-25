@@ -88,7 +88,7 @@ export classical_ising, classical_ising_symmetric, ising_βc, f_onsager, ising_c
     ising_βc_3D, classical_ising_symmetric_3D, classical_ising_3D, classical_ising_impurity,
     classical_ising_triangular, classical_ising_triangular_symmetric,
     ising_βc_triangular, f_onsager_triangular,
-    classical_ising_honeycomb, classical_ising_triangular_honeycomb,
+    classical_ising_honeycomb, classical_ising_honeycomb_symmetric,
     ising_βc_honeycomb, f_onsager_honeycomb
 
 include("models/gross-neveu.jl")
