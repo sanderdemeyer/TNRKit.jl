@@ -42,9 +42,12 @@ The following schemes are currently implemented:
 - c6vCTM_triangular (c6v symmetric CTM on the triangular lattice)
 - CTM_triangular (CTM on the triangular lattice)
 
-**Impurity Methods**
-- ImpurityTRG
-- ImpurityHOTRG
+**2D Impurity Methods**
+- ImpurityTRG (Expectation value calculation via TRG)
+- ImpurityHOTRG (Expectation value calculation via HOTRG)
+
+**2D Correlation Methods**
+- CorrelationHOTRG (Correlation function calculation via HOTRG)
 
 **3D cubic tensor networks**
 - ATRG_3D (anisotropic TRG)
@@ -101,6 +104,8 @@ TNRKit includes several common models out of the box.
 - Six Vertex model: `sixvertex(scalartype, spacetype; a=1.0, b=1.0, c=1.0)`
 - Clock model: `classical_clock` and `classical_clock_symmetric`, which has a $\mathbb{Z}_q$ grading on each leg.
 - XY model: `classical_XY_U1_symmetric` and `classical_XY_O2_symmetric`
+- Real $\phi^4$ model: `phi4_real` and  `phi4_real_Z2`, which has a $\mathbb{Z}_2$ grading on each leg.
+- Complex $\phi^4$ model: `phi4_complex`,  `phi4_complex_U1`, which has a $U(1)$ grading on each leg and `phi4_complex_Z2Z2`, which has a $\mathbb{Z}_2 \times \mathbb{Z}_2$ grading on each leg.
 
 ## Included Models on the triangular lattice
 TNRKit includes several common models out of the box.
