@@ -36,6 +36,7 @@ include("schemes/ctm/sublattice_ctm.jl")
 include("schemes/ctm/triangular.jl")
 include("schemes/ctm/ctm_triangular.jl")
 include("schemes/ctm/c6vctm_triangular.jl")
+include("schemes/ctm/c3vctm_honeycomb.jl")
 
 # Impurity methods
 include("schemes/impuritytrg.jl")
@@ -67,6 +68,7 @@ export ctm_HOTRG
 export lnz
 export c6vCTM_triangular
 export CTM_triangular
+export c3vCTM_honeycomb
 
 export ImpurityTRG
 export ImpurityHOTRG
@@ -81,10 +83,13 @@ export run!
 # models
 include("models/ising.jl")
 include("models/ising_triangular.jl")
+include("models/ising_honeycomb.jl")
 export classical_ising, classical_ising_symmetric, ising_βc, f_onsager, ising_cft_exact,
     ising_βc_3D, classical_ising_symmetric_3D, classical_ising_3D, classical_ising_impurity,
     classical_ising_triangular, classical_ising_triangular_symmetric,
-    ising_βc_triangular, f_onsager_triangular
+    ising_βc_triangular, f_onsager_triangular,
+    classical_ising_honeycomb, classical_ising_honeycomb_symmetric,
+    ising_βc_honeycomb, f_onsager_honeycomb
 
 include("models/gross-neveu.jl")
 export gross_neveu_start

@@ -42,6 +42,9 @@ The following schemes are currently implemented:
 - c6vCTM_triangular (c6v symmetric CTM on the triangular lattice)
 - CTM_triangular (CTM on the triangular lattice)
 
+**2D honeycomb CTM methods**
+- c3vCTM_honeycomb (c3v symmetric CTM on the honeycomb lattice)
+
 **2D Impurity Methods**
 - ImpurityTRG (Expectation value calculation via TRG)
 - ImpurityHOTRG (Expectation value calculation via HOTRG)
