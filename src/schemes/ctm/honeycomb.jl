@@ -74,50 +74,21 @@ function c3vCTM_honeycomb_init(T::TensorMap{A, S, 0, 3}) where {A, S}
     return C, L, R
 end
 
-# Functions to permute (flipped and unflipped) tensors under 60 degree rotation
-function rotl120_pf_honeycomb(T::TensorMap{A, S, 2, 1}) where {A, S}
-    return permute(T, ((3, 1), (2,)))
-end
-
-function rotr120_pf_honeycomb(T::TensorMap{A, S, 2, 1}) where {A, S}
-    return permute(T, ((2, 3), (1,)))
-end
-
+# Functions to permute (unflipped) tensors under 120 degree rotation
 function rotl120_pf_honeycomb(T::TensorMap{A, S, 0, 3}) where {A, S}
     return permute(T, ((), (2, 3, 1)))
 end
 
-function rotr120_pf_honeycomb(T::TensorMap{A, S, 0, 3}) where {A, S}
-    return permute(T, ((), (3, 1, 2)))
-end
-
 function rotl120_pf_honeycomb(T::TensorMap{A, S, 0, 3}, i::Int) where {A, S}
+    @assert i >= 0 "Negative rotation not supported"
     if i == 0
         return T
-    end
-    if i < 0
-        return rotr120_pf_honeycomb(T, -i)
     end
     return rotl120_pf_honeycomb(rotl120_pf_honeycomb(T), i - 1)
 end
 
-function rotr120_pf_honeycomb(T::TensorMap{A, S, 0, 3}, i::Int) where {A, S}
-    if i == 0
-        return T
-    end
-    if i < 0
-        return rotl120_pf_honeycomb(T, -i)
-    end
-    return rotr120_pf_honeycomb(rotr120_pf_honeycomb(T), i - 1)
-end
-
 function symmetrize_C3_honeycomb(T_unflipped::TensorMap{E, S, 0, 3}) where {E, S}
     return (T_unflipped + rotl120_pf_honeycomb(T_unflipped) + rotl120_pf_honeycomb(rotl120_pf_honeycomb(T_unflipped))) / 3
-end
-
-function symmetrize_C3_honeycomb(T_flipped::TensorMap{E, S, 2, 1}) where {E, S}
-    T_unflipped = permute(flip(T_flipped, [1 2]; inv = true), ((), (3, 2, 1)))
-    return symmetrize_C3_honeycomb(T_unflipped)
 end
 
 function is_C3_symmetric(T_unflipped::TensorMap{E, S, 0, 3}) where {E, S}
