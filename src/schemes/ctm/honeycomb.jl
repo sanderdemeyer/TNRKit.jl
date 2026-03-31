@@ -98,7 +98,7 @@ function rotl120_pf_honeycomb(T::TensorMap{A, S, 0, 3}, i::Int) where {A, S}
     if i < 0
         return rotr120_pf_honeycomb(T, -i)
     end
-    return rotl120_pf_honeycomb(rotl120_pf_honeycomb(T), i-1)
+    return rotl120_pf_honeycomb(rotl120_pf_honeycomb(T), i - 1)
 end
 
 function rotr120_pf_honeycomb(T::TensorMap{A, S, 0, 3}, i::Int) where {A, S}
@@ -108,19 +108,19 @@ function rotr120_pf_honeycomb(T::TensorMap{A, S, 0, 3}, i::Int) where {A, S}
     if i < 0
         return rotl120_pf_honeycomb(T, -i)
     end
-    return rotr120_pf_honeycomb(rotr120_pf_honeycomb(T), i-1)
+    return rotr120_pf_honeycomb(rotr120_pf_honeycomb(T), i - 1)
 end
 
-function symmetrize_C3_honeycomb(T_unflipped::TensorMap{E, S, 0, 3}) where {E,S}
+function symmetrize_C3_honeycomb(T_unflipped::TensorMap{E, S, 0, 3}) where {E, S}
     return (T_unflipped + rotl120_pf_honeycomb(T_unflipped) + rotl120_pf_honeycomb(rotl120_pf_honeycomb(T_unflipped))) / 3
 end
 
-function symmetrize_C3_honeycomb(T_flipped::TensorMap{E,S,2,1}) where {E,S}
+function symmetrize_C3_honeycomb(T_flipped::TensorMap{E, S, 2, 1}) where {E, S}
     T_unflipped = permute(flip(T_flipped, [1 2]; inv = true), ((), (3, 2, 1)))
     return symmetrize_C3_honeycomb(T_unflipped)
 end
 
-function is_C3_symmetric(T_unflipped::TensorMap{E,S,0,3}) where {E,S}
+function is_C3_symmetric(T_unflipped::TensorMap{E, S, 0, 3}) where {E, S}
     return space(T_unflipped) == space(rotl120_pf_honeycomb(T_unflipped)) && norm(T_unflipped - rotl120_pf_honeycomb(T_unflipped)) < 1.0e-14
 end
 
@@ -191,7 +191,7 @@ function CTM_honeycomb_init(A::TensorMap{E, S, 0, 3}; B::TensorMap{E, S, 0, 3} =
     S_type = scalartype(A)
     Vp = space(A)[1]'
     C = fill(ones(S_type, oneunit(Vp) ← oneunit(Vp)), 3)
-    Ta = [ones(S_type, oneunit(Vp) ⊗ space(B)[mod1(dir-1,3)]' ← oneunit(Vp)) for dir = 1:3]
-    Tb = [ones(S_type, oneunit(Vp) ⊗ space(A)[mod1(dir+1,3)]' ← oneunit(Vp)) for dir = 1:3]
+    Ta = [ones(S_type, oneunit(Vp) ⊗ space(B)[mod1(dir - 1, 3)]' ← oneunit(Vp)) for dir in 1:3]
+    Tb = [ones(S_type, oneunit(Vp) ⊗ space(A)[mod1(dir + 1, 3)]' ← oneunit(Vp)) for dir in 1:3]
     return C, Ta, Tb
 end
