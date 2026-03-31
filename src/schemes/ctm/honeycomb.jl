@@ -163,7 +163,7 @@ or with a (0,3) tensor (120°, 0°, 240°) where all arrows point inward (unflip
 $(TYPEDFIELDS)
 
 ### References
-* [Lukin et al. Phys. Rev. B 107.054424 (2023)](@cite lukin2023)
+* [Nyckees et al. Phys. Rev. E 108.064132 (2023)](@cite nyckees2023)
 """
 mutable struct CTM_honeycomb{E, S}
     A::TensorMap{E, S, 0, 3}

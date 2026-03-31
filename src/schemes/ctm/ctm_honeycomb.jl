@@ -1,6 +1,3 @@
-# Based on
-# https://arxiv.org/abs/2306.09046
-
 function run!(
         scheme::CTM_honeycomb, trunc::TruncationStrategy, criterion::stopcrit;
         verbosity = 1
