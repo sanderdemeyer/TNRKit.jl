@@ -48,6 +48,7 @@ The following schemes are currently implemented:
 
 **2D honeycomb CTM methods**
 - c3vCTM_honeycomb (c3v symmetric CTM on the honeycomb lattice)
+- CTM_honeycomb (CTM on the honeycomb lattice)
 
 **2D Impurity Methods**
 - ImpurityTRG (Expectation value calculation via TRG)
