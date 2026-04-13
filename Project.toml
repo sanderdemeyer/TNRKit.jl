@@ -2,7 +2,6 @@ name = "TNRKit"
 uuid = "7dfc3ef0-df9b-475f-b8e2-b91f34f5d84d"
 version = "0.5.1"
 authors = ["Victor Vanthilt, Adwait Naravane, Atsushi Ueda and contributors"]
-version = "0.5.0"
 
 [deps]
 Combinatorics = "861a8166-3701-5b0c-9a16-15d98fcdc6aa"
